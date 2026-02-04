@@ -219,7 +219,7 @@
 
         <div class="grid">
             
-            <div class="card leader">
+            <div class="card leader" onmouseover="dinoRoast('shlok')">
                 <span class="role-tag">The Boss</span>
                 <h3>Shlok Agrawal</h3>
                 <p>Crashing, & Rebooting</p>
@@ -227,14 +227,14 @@
                 <button class="audio-btn" onclick="playNoise('shlok')">🔊 ERROR</button>
             </div>
 
-            <div class="card">
+            <div class="card" onmouseover="dinoRoast('arpit')">
                 <span class="role-tag">Hardware</span>
                 <h3>Arpit Kumar Dubey</h3>
                 <p>Wiring & Sparks</p>
-                <button class="audio-btn" onclick="playNoise('arpit')">🔊 EXPOSE HIM</button>
+                <button class="audio-btn" onclick="playNoise('arpit')">🔊 ADMISSION REGRET</button>
             </div>
 
-            <div class="card">
+            <div class="card" onmouseover="dinoRoast('krishna')">
                 <span class="role-tag">Integration</span>
                 <h3>Krishna Singh</h3>
                 <p>Making things fit</p>
@@ -245,17 +245,17 @@
                 <span class="role-tag">Testing</span>
                 <h3>Priyansh Sharma</h3>
                 <p>Breaks things professionally</p>
-                <button class="audio-btn" onclick="playNoise('priyansh')">🔊 LEAKED AUDIO</button>
+                <button class="audio-btn" onclick="playNoise('priyansh')">🔊 SYSTEM CRASH</button>
             </div>
 
-            <div class="card">
+            <div class="card" onmouseover="dinoRoast('yash')">
                 <span class="role-tag">Design</span>
                 <h3>Yash Rana</h3>
                 <p>Makes it look cool</p>
                 <button class="audio-btn" onclick="playNoise('yash')">🔊 HEAR AUDIO</button>
             </div>
 
-            <div class="card">
+            <div class="card" onmouseover="dinoRoast('vansh')">
                 <span class="role-tag">Research</span>
                 <h3>Vansh Gupta</h3>
                 <p>Googling stuff</p>
@@ -380,10 +380,37 @@
                 });
             }
         }
+        const teamRoasts = {
+    'shlok': "Shlok is the kind of guy who’d sell his soul for 75% attendance and still fail.",
+    'arpit': "Arpit's future is as stable as the hostel Wi-Fi.
+    'priyansh': "Priyansh is the reason the group project has a 'Part 2' next year.",
+    'krishna': "Krishna's code is 90% Stack Overflow, 10% prayers.",
+    'vansh': "Vansh is a specialist in doing nothing and still feeling tired.",
+    'yash': "Yash spent 4 hours picking a color. It's still gray."
+    };
+
+        function dinoRoast(name) {
+        const dino = document.getElementById('dino-container');
+        const bubble = document.getElementById('dino-text');
+    
+    // Set the roast based on the name passed
+        bubble.innerText = teamRoasts[name] || "Who is this human?";
+    
+        // Pop up effect
+        dino.style.bottom = "0px";
+        bubble.style.display = "block";
+
+        // Stay up a bit longer for them to read the roast
+        setTimeout(() => {
+        dino.style.bottom = "-300px";
+        bubble.style.display = "none";
+    }, 3500);
+}
     </script>
 </body>
 
 </html>
+
 
 
 
