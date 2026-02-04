@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DUSTU.TECH | The Chaos Crew</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg: #0f0e17;
+            --card: #fffffe;
+            --head: #ff8906;
+            --para: #a7a9be;
+            --btn: #f25f4c;
+            --btn-text: #fffffe;
+            --highlight: #e53170;
+            --secondary: #2cb67d;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--card);
+            font-family: 'Space Grotesk', sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+            cursor: crosshair; /* Adds to the gamer vibe */
+        }
+
+        /* --- THE PEEKING DINO (Ollivere Style) --- */
+        #dino-container {
+            position: fixed;
+            bottom: -300px; /* Hidden start */
+            right: 5%;
+            width: 200px;
+            height: 250px;
+            z-index: 1000;
+            pointer-events: none; /* Let clicks pass through unless active */
+            transition: bottom 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* Bouncy */
+        }
+
+        #dino-img {
+            width: 100%;
+            height: auto;
+            filter: drop-shadow(0px 0px 10px var(--highlight));
+        }
+
+        /* Bubbles for Dino speech */
+        .speech-bubble {
+            position: absolute;
+            top: -60px;
+            left: -50px;
+            background: white;
+            color: black;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.7rem;
+            display: none; /* Hidden by default */
+        }
+        
+        .speech-bubble:after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            right: 20px;
+            border-width: 10px 10px 0;
+            border-style: solid;
+            border-color: white transparent;
+            display: block;
+            width: 0;
+        }
+
+        /* --- LAYOUT --- */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 80px;
+            padding-top: 50px;
+        }
+
+        h1 {
+            font-family: 'Press Start 2P', cursive;
+            color: var(--head);
+            font-size: 3rem;
+            line-height: 1.5;
+            text-transform: uppercase;
+            text-shadow: 4px 4px 0px var(--highlight);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--para);
+            max-width: 600px;
+            margin: 20px auto;
+            background: rgba(255,255,255,0.05);
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px dashed var(--secondary);
+        }
+
+        /* --- TEAM GRID --- */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .card {
+            background: #232946;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            position: relative;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 0 rgba(0,0,0,0.3);
+        }
+
+        .card:hover {
+            transform: translateY(-10px) rotate(2deg);
+            border-color: var(--highlight);
+            z-index: 10;
+        }
+
+        .card h3 {
+            color: var(--head);
+            margin: 10px 0;
+            font-size: 1.5rem;
+        }
+
+        .card p {
+            color: var(--para);
+            font-size: 0.9rem;
+        }
+
+        .role-tag {
+            display: inline-block;
+            background: var(--highlight);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        /* Leader Special Style */
+        .card.leader {
+            background: #2cb67d;
+            border: 4px solid #fffffe;
+        }
+        .card.leader h3, .card.leader p { color: #0f0e17; }
+        .card.leader .role-tag { background: #0f0e17; color: var(--secondary); }
+
+        /* --- AUDIO BUTTONS --- */
+        .audio-btn {
+            background: var(--btn);
+            color: var(--btn-text);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: transform 0.1s;
+            box-shadow: 0 4px 0 #8a2be2;
+        }
+
+        .audio-btn:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+
+        /* --- FLOATING SHAPES BACKGROUND --- */
+        .bg-shape {
+            position: absolute;
+            z-index: 0;
+            opacity: 0.1;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="bg-shape" style="top: 10%; left: 5%; font-size: 10rem;">✖</div>
+    <div class="bg-shape" style="top: 50%; right: 10%; font-size: 8rem;">●</div>
+    <div class="bg-shape" style="bottom: 10%; left: 20%; font-size: 12rem;">▲</div>
+
+    <div id="dino-container">
+        <div class="speech-bubble" id="dino-text">SORTING TRASH... BEEP BOOP</div>
+        <img id="dino-img" src="https://media.tenor.com/2s90s01tqFwAAAAi/cat-dance.gif" alt="Funny Dino">
+    </div>
+
+    <div class="container">
+        <header>
+            <h1 class="ml15">
+                <span class="word">DUSTU</span>
+                <span class="word">.TECH</span>
+            </h1>
+            <div class="subtitle">
+                <p><strong>PROJECT: ECO-DROID V2</strong></p>
+                <p>A semi-autonomous robot that eats trash, sorts it using YOLOv8 AI, and sometimes questions its own existence.</p>
+                <p><em>Also features "Uber Mode" for joyrides.</em></p>
+            </div>
+        </header>
+
+        <h2 style="text-align: center; color: var(--highlight); font-family: 'Press Start 2P'; margin-bottom: 40px;">THE SQUAD</h2>
+
+        <div class="grid">
+            
+            <div class="card leader">
+                <span class="role-tag">The Boss</span>
+                <h3>Shlok Agrawal</h3>
+                <p>Coding, Crashing, & Rebooting</p>
+                <p style="font-size: 0.7rem; margin-top: 5px;">"It works on my machine (Arch btw)"</p>
+            </div>
+
+            <div class="card">
+                <span class="role-tag">Hardware</span>
+                <h3>Arpit</h3>
+                <p>Wiring & Sparks</p>
+                <button class="audio-btn" onclick="playNoise('arpit')">🔊 EXPOSE HIM</button>
+            </div>
+
+            <div class="card">
+                <span class="role-tag">Integration</span>
+                <h3>Krishna</h3>
+                <p>Making things fit</p>
+                <button class="audio-btn" onclick="playNoise('krishna')">🔊 HEAR THIS</button>
+            </div>
+
+            <div class="card">
+                <span class="role-tag">Testing</span>
+                <h3>Priyansh</h3>
+                <p>Breaks things professionally</p>
+                <button class="audio-btn" onclick="playNoise('priyansh')">🔊 LEAKED AUDIO</button>
+            </div>
+
+            <div class="card">
+                <span class="role-tag">Design</span>
+                <h3>Yash</h3>
+                <p>Makes it look cool</p>
+            </div>
+
+            <div class="card">
+                <span class="role-tag">Research</span>
+                <h3>Vansh</h3>
+                <p>Googling stuff</p>
+            </div>
+
+            <div class="card">
+                <span class="role-tag">Power</span>
+                <h3>Shani</h3>
+                <p>Battery Manager</p>
+            </div>
+
+            <div class="card">
+                <span class="role-tag">Docs</span>
+                <h3>Poorvi</h3>
+                <p>Writing the manual</p>
+            </div>
+
+            <div class="card">
+                <span class="role-tag">Circuits</span>
+                <h3>Dweepraj</h3>
+                <p>Board Logic</p>
+            </div>
+
+        </div>
+    </div>
+
+    <audio id="audio-arpit" src="arpit.mp3"></audio>
+    <audio id="audio-krishna" src="krishna.mp3"></audio>
+    <audio id="audio-priyansh" src="priyansh.mp3"></audio>
+
+    <script>
+        // --- 1. ANIMATIONS (Entrance) ---
+        anime.timeline({loop: false})
+        .add({
+            targets: '.ml15 .word',
+            scale: [14,1],
+            opacity: [0,1],
+            easing: "easeOutCirc",
+            duration: 800,
+            delay: (el, i) => 800 * i
+        }).add({
+            targets: '.subtitle',
+            translateY: [20, 0],
+            opacity: [0, 1],
+            duration: 600
+        }).add({
+            targets: '.card',
+            translateY: [50, 0],
+            opacity: [0, 1],
+            delay: anime.stagger(100), // Cards appear one by one
+            easing: 'spring(1, 80, 10, 0)'
+        });
+
+        // --- 2. DINO PEEK LOGIC ---
+        const dino = document.getElementById('dino-container');
+        const bubble = document.getElementById('dino-text');
+        
+        // Random phrases the robot/dino says
+        const phrases = [
+            "Sorting Waste...",
+            "Who are you?",
+            "Arch Linux is best.",
+            "Feed me data!",
+            "I see you looking."
+        ];
+
+        function popUpDino() {
+            // Pick random text
+            bubble.innerText = phrases[Math.floor(Math.random() * phrases.length)];
+            
+            // Show Dino
+            dino.style.bottom = "0px";
+            setTimeout(() => { bubble.style.display = "block"; }, 300);
+
+            // Hide after 4 seconds
+            setTimeout(() => {
+                bubble.style.display = "none";
+                dino.style.bottom = "-300px";
+            }, 4000);
+        }
+
+        // Trigger every 8 seconds automatically
+        setInterval(popUpDino, 8000);
+
+        // Also trigger when clicking the header
+        document.querySelector('header').addEventListener('click', popUpDino);
+
+
+        // --- 3. AUDIO PLAYER ---
+        function playNoise(name) {
+            // Stop others
+            document.querySelectorAll('audio').forEach(a => { a.pause(); a.currentTime = 0; });
+            
+            // Play selected
+            const sound = document.getElementById('audio-' + name);
+            if (sound) {
+                sound.play().catch(e => alert("Please add " + name + ".mp3 to your folder!"));
+                
+                // Animate the button being clicked
+                anime({
+                    targets: event.target,
+                    scale: [1, 0.9, 1],
+                    duration: 200
+                });
+            }
+        }
+    </script>
+</body>
+</html>
