@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DUSTU CONTROL // V2</title>
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <style>
+        :root {
+            --neon-green: #0f0;
+            --dark-bg: #050505;
+            --panel-bg: #111;
+            --alert-red: #ff3333;
+        }
+        
+        body {
+            background-color: var(--dark-bg);
+            color: var(--neon-green);
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            height: 100vh;
+            display: grid;
+            grid-template-rows: 60px 1fr 150px; /* Header, Main, Terminal */
+            overflow: hidden;
+        }
+
+        /* --- HEADER --- */
+        header {
+            border-bottom: 2px solid var(--neon-green);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            background: #000;
+        }
+
+        .status-badge {
+            background: #002200;
+            border: 1px solid var(--neon-green);
+            padding: 5px 15px;
+            font-size: 14px;
+        }
+
+        /* --- MAIN LAYOUT (Video Left, Controls Right) --- */
+        .main-deck {
+            display: grid;
+            grid-template-columns: 2fr 1fr; /* 2 parts Video, 1 part Controls */
+            gap: 10px;
+            padding: 10px;
+        }
+
+        /* Video Feed Box */
+        .video-container {
+            border: 1px solid #333;
+            background: #000;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .overlay-text {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            padding: 5px;
+            pointer-events: none;
+        }
+
+        /* Controls Box */
+        .controls-panel {
+            background: var(--panel-bg);
+            border: 1px solid #333;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-around;
+        }
+
+        /* D-PAD (WASD Layout) */
+        .d-pad {
+            display: grid;
+            grid-template-columns: 60px 60px 60px;
+            grid-template-rows: 60px 60px;
+            gap: 5px;
+        }
+
+        .btn {
+            background: #222;
+            border: 1px solid var(--neon-green);
+            color: var(--neon-green);
+            font-size: 20px;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        
+        .btn:active { background: var(--neon-green); color: #000; }
+        .btn-up { grid-column: 2; grid-row: 1; }
+        .btn-left { grid-column: 1; grid-row: 2; }
+        .btn-down { grid-column: 2; grid-row: 2; }
+        .btn-right { grid-column: 3; grid-row: 2; }
+
+        /* Action Buttons */
+        .actions {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 15px;
+            background: #330000;
+            border: 1px solid var(--alert-red);
+            color: var(--alert-red);
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .action-btn:hover { background: var(--alert-red); color: #000; }
+        .lid-btn { background: #003333; border-color: cyan; color: cyan; }
+
+        /* --- TERMINAL (Logs) --- */
+        .terminal {
+            border-top: 2px solid #333;
+            background: #000;
+            padding: 10px;
+            font-size: 12px;
+            overflow-y: auto;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .main-deck { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h3>DUSTU_OS <span style="font-size:10px;">v2.0</span></h3>
+        <div id="connection-status" class="status-badge" style="color: red;">OFFLINE</div>
+    </header>
+
+    <div class="main-deck">
+        <div class="video-container">
+            <iframe id="cam-feed" src="https://vdo.ninja/?view=dustu_cam_01&cleanoutput&audiocontrols=0" allow="autoplay; camera; microphone;"></iframe>
+            <div class="overlay-text">
+                CAM_1: ONLINE <br>
+                LATENCY: 12ms
+            </div>
+        </div>
+
+        <div class="controls-panel">
+            
+            <div class="d-pad">
+                <button class="btn btn-up" onmousedown="move('F')" onmouseup="move('S')">▲</button>
+                <button class="btn btn-left" onmousedown="move('L')" onmouseup="move('S')">◄</button>
+                <button class="btn btn-down" onmousedown="move('B')" onmouseup="move('S')">▼</button>
+                <button class="btn btn-right" onmousedown="move('R')" onmouseup="move('S')">►</button>
+            </div>
+
+            <div style="font-size: 10px; color: #666; margin-top: 10px;">
+                KEYBOARD: W A S D
+            </div>
+
+            <hr style="width: 100%; border-color: #333;">
+
+            <div class="actions">
+                <button class="action-btn lid-btn" onclick="sendCommand('LID_OPEN')">OPEN LID</button>
+                <button class="action-btn lid-btn" onclick="sendCommand('LID_CLOSE')">CLOSE LID</button>
+            </div>
+            
+            <div class="actions" style="margin-top: 10px;">
+                <button class="action-btn" onclick="sendCommand('HONK')">🔊 HONK</button>
+                <button class="action-btn" style="border-color: red;" onclick="sendCommand('STOP_ALL')">🛑 KILL</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="terminal" id="terminal-log">
+        <div>> SYSTEM INITIALIZED...</div>
+        <div>> WAITING FOR MQTT BROKER...</div>
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        // We use a free public broker for testing. Replace with HiveMQ later.
+        const mqtt_broker = 'wss://broker.hivemq.com:8000/mqtt'; 
+        const topic_pub = 'dustu/control';
+        const topic_sub = 'dustu/telemetry';
+        
+        let client = mqtt.connect(mqtt_broker);
+        const logBox = document.getElementById('terminal-log');
+        const statusBadge = document.getElementById('connection-status');
+
+        // --- MQTT CONNECTION HANDLERS ---
+        client.on('connect', function () {
+            statusBadge.innerText = "CONNECTED (HIVE-MQ)";
+            statusBadge.style.color = "#0f0";
+            statusBadge.style.borderColor = "#0f0";
+            log("Connected to Cloud Broker Successfully.");
+        });
+
+        client.on('message', function (topic, message) {
+            // This runs when the Robot sends data BACK to us
+            log(`[ROBOT]: ${message.toString()}`);
+        });
+
+        // --- COMMAND FUNCTIONS ---
+        function move(direction) {
+            // F = Forward, B = Back, L = Left, R = Right, S = Stop
+            client.publish(topic_pub, direction);
+            log(`SENT MOVE: ${direction}`);
+        }
+
+        function sendCommand(cmd) {
+            client.publish(topic_pub, cmd);
+            log(`SENT CMD: ${cmd}`);
+        }
+
+        // --- LOGGING HELPER ---
+        function log(msg) {
+            const time = new Date().toLocaleTimeString();
+            logBox.innerHTML += `<div><span style="color:#666">[${time}]</span> ${msg}</div>`;
+            logBox.scrollTop = logBox.scrollHeight; // Auto scroll
+        }
+
+        // --- KEYBOARD SUPPORT (WASD) ---
+        document.addEventListener('keydown', (e) => {
+            if(e.repeat) return; // Prevent spamming while holding key
+            if(e.key === 'w' || e.key === 'W') move('F');
+            if(e.key === 's' || e.key === 'S') move('B');
+            if(e.key === 'a' || e.key === 'A') move('L');
+            if(e.key === 'd' || e.key === 'D') move('R');
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if(['w','a','s','d','W','A','S','D'].includes(e.key)) move('S');
+        });
+
+    </script>
+</body>
+</html>
