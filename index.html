@@ -6,6 +6,7 @@
     <title>DUSTU.TECH | The Chaos Crew</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+    <a href="#" onclick="adminLogin()" style="color: #666; text-decoration: none; margin-left: 15px; font-size: 12px;">[ADMIN_LOGIN]</a>
     
     <style>
         :root {
@@ -210,6 +211,19 @@
             </h1>
             <div class="subtitle">
                 <p><strong>PROJECT: DUSTU </strong></p>
+                <a href="live.html" style="
+                display: inline-block;
+                border: 2px solid #0f0;
+                color: #0f0;
+                padding: 10px 20px;
+                text-decoration: none;
+                font-family: 'Courier New';
+                margin-top: 20px;
+                font-weight: bold;
+                background: rgba(0, 255, 0, 0.1);
+            ">
+    🔴 WATCH LIVE FEED
+</a>
                 <p>A semi-autonomous robot that eats trash, sorts it using YOLOv8 AI, and sometimes questions its own existence.</p>
                 <p><em>Also features "Uber Mode" for joyrides.</em></p>
             </div>
@@ -407,9 +421,20 @@
     }, 3500);
 }
     </script>
+    <script>
+    function adminLogin() {
+        const password = prompt("ENTER COMMAND CODE:");
+        if (password === "shlok123") { // CHANGE THIS PASSWORD
+            window.location.href = "console.html";
+        } else {
+            alert("ACCESS DENIED.");
+        }
+    }
+</script>
 </body>
 
 </html>
+
 
 
 
