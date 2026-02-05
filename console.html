@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DUSTU CONTROL // V2</title>
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <script>
+    // Simple Session Check
+    const isAuthorized = sessionStorage.getItem("admin_access");
+    
+    // If you want to force login every time, just use the password prompt here directly:
+    const pass = prompt("ADMIN CONSOLE: PASSWORD REQUIRED");
+    if(pass !== "shlok123") {
+        window.location.href = "index.html"; // Kick them back to home
+    }
+</script>
     <style>
         :root {
             --neon-green: #0f0;
