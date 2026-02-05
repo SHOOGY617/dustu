@@ -191,7 +191,20 @@
                 <button class="action-btn lid-btn" onclick="sendCommand('LID_OPEN')">OPEN LID</button>
                 <button class="action-btn lid-btn" onclick="sendCommand('LID_CLOSE')">CLOSE LID</button>
             </div>
-            
+            <div style="margin-top: 20px; border-top: 1px solid #333; padding-top: 10px;">
+        <div style="font-size: 10px; color: cyan; margin-bottom: 5px;">ACCESS CONTROL</div>
+        <button onclick="setAccess('OPEN')" style="background: #003300; color: #0f0; border: 1px solid #0f0; padding: 5px 10px;">ALLOW GUESTS</button>
+        <button onclick="setAccess('LOCKED')" style="background: #330000; color: red; border: 1px solid red; padding: 5px 10px;">⚠ LOCK GUESTS</button>
+    </div>
+
+<script>
+    // Add this function to your existing script
+    function setAccess(state) {
+        // Publishes to the System Access channel
+        client.publish('dustu/system/access', state);
+        log(`ACCESS LEVEL SET TO: ${state}`);
+    }
+</script>
             <div class="actions" style="margin-top: 10px;">
                 <button class="action-btn" onclick="sendCommand('HONK')">🔊 HONK</button>
                 <button class="action-btn" style="border-color: red;" onclick="sendCommand('STOP_ALL')">🛑 KILL</button>
