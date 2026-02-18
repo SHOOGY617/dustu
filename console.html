@@ -205,10 +205,14 @@
         log(`ACCESS LEVEL SET TO: ${state}`);
     }
 </script>
-            <div class="actions" style="margin-top: 10px;">
-                <button class="action-btn" onclick="sendCommand('HONK')">🔊 HONK</button>
-                <button class="action-btn" style="border-color: red;" onclick="sendCommand('STOP_ALL')">🛑 KILL</button>
-            </div>
+            <div class="actions">
+    <button class="action-btn lid-btn" style="background:#004400" onclick="sendCommand('LID_OPEN')">OPEN LID</button>
+    </div>
+
+<div class="actions" style="margin-top: 10px;">
+    <button class="action-btn" style="border-color: yellow; color: yellow;" onclick="sendCommand('DRY')">DRY WASTE</button>
+    <button class="action-btn" style="border-color: cyan; color: cyan;" onclick="sendCommand('WET')">WET WASTE</button>
+</div>
         </div>
     </div>
 
