@@ -14,7 +14,7 @@
     if(pass !== "dustu123") {
         window.location.href = "index.html"; // Kick them back to home
     }
-</script>
+    </script>
     <style>
         :root {
             --neon-green: #0f0;
@@ -95,6 +95,16 @@
             justify-content: space-around;
         }
 
+        /* --- NEW AI STATUS BOX --- */
+        .ai-dashboard {
+            width: 100%;
+            text-align: center;
+            border: 1px dashed var(--neon-green);
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #001100;
+        }
+
         /* D-PAD (WASD Layout) */
         .d-pad {
             display: grid;
@@ -161,11 +171,7 @@
 
     <div class="main-deck">
         <div class="video-container">
-            <iframe 
-    id="cam-feed" 
-    src="https://vdo.ninja/?view=dustu_cam_01&cleanoutput&autoplay" 
-    allow="autoplay; camera;">
-</iframe>
+            <iframe id="cam-feed" src="https://vdo.ninja/?view=dustu_cam_01&cleanoutput&autoplay" allow="autoplay; camera;"></iframe>
             <div class="overlay-text">
                 CAM_1: ONLINE <br>
                 LATENCY: 12ms
@@ -174,45 +180,40 @@
 
         <div class="controls-panel">
             
-            <div class="d-pad">
-                <button class="btn btn-up" onmousedown="move('F')" onmouseup="move('S')">▲</button>
-                <button class="btn btn-left" onmousedown="move('L')" onmouseup="move('S')">◄</button>
-                <button class="btn btn-down" onmousedown="move('B')" onmouseup="move('S')">▼</button>
-                <button class="btn btn-right" onmousedown="move('R')" onmouseup="move('S')">►</button>
+            <div class="ai-dashboard">
+                <div style="font-size: 10px; color: #aaa;">AI VISION SYSTEM</div>
+                <div id="ai-status" style="font-size: 18px; font-weight: bold; color: yellow;">WAITING...</div>
             </div>
 
-            <div style="font-size: 10px; color: #666; margin-top: 10px;">
+            <div class="d-pad">
+                <button class="btn btn-up" onmousedown="move('F')" onmouseup="move('S')" ontouchstart="move('F')" ontouchend="move('S')">▲</button>
+                <button class="btn btn-left" onmousedown="move('L')" onmouseup="move('S')" ontouchstart="move('L')" ontouchend="move('S')">◄</button>
+                <button class="btn btn-down" onmousedown="move('B')" onmouseup="move('S')" ontouchstart="move('B')" ontouchend="move('S')">▼</button>
+                <button class="btn btn-right" onmousedown="move('R')" onmouseup="move('S')" ontouchstart="move('R')" ontouchend="move('S')">►</button>
+            </div>
+
+            <div style="font-size: 10px; color: #666; margin-top: 10px; margin-bottom: 10px;">
                 KEYBOARD: W A S D
             </div>
 
             <hr style="width: 100%; border-color: #333;">
 
             <div class="actions">
-                <button class="action-btn lid-btn" onclick="sendCommand('LID_OPEN')">OPEN LID</button>
+                <button class="action-btn lid-btn" style="background:#004400" onclick="sendCommand('LID_OPEN')">OPEN LID</button>
                 <button class="action-btn lid-btn" onclick="sendCommand('LID_CLOSE')">CLOSE LID</button>
             </div>
-            <div style="margin-top: 20px; border-top: 1px solid #333; padding-top: 10px;">
-        <div style="font-size: 10px; color: cyan; margin-bottom: 5px;">ACCESS CONTROL</div>
-        <button onclick="setAccess('OPEN')" style="background: #003300; color: #0f0; border: 1px solid #0f0; padding: 5px 10px;">ALLOW GUESTS</button>
-        <button onclick="setAccess('LOCKED')" style="background: #330000; color: red; border: 1px solid red; padding: 5px 10px;">⚠ LOCK GUESTS</button>
-    </div>
 
-<script>
-    // Add this function to your existing script
-    function setAccess(state) {
-        // Publishes to the System Access channel
-        client.publish('dustu/system/access', state);
-        log(`ACCESS LEVEL SET TO: ${state}`);
-    }
-</script>
-            <div class="actions">
-    <button class="action-btn lid-btn" style="background:#004400" onclick="sendCommand('LID_OPEN')">OPEN LID</button>
-    </div>
+            <div class="actions" style="margin-top: 10px;">
+                <button class="action-btn" style="border-color: yellow; color: yellow; background: #222;" onclick="sendCommand('DRY')">DRY WASTE</button>
+                <button class="action-btn" style="border-color: cyan; color: cyan; background: #222;" onclick="sendCommand('WET')">WET WASTE</button>
+            </div>
 
-<div class="actions" style="margin-top: 10px;">
-    <button class="action-btn" style="border-color: yellow; color: yellow;" onclick="sendCommand('DRY')">DRY WASTE</button>
-    <button class="action-btn" style="border-color: cyan; color: cyan;" onclick="sendCommand('WET')">WET WASTE</button>
-</div>
+            <div style="margin-top: 15px; border-top: 1px solid #333; padding-top: 10px; width: 100%; text-align: center;">
+                <div style="font-size: 10px; color: cyan; margin-bottom: 5px;">ACCESS CONTROL</div>
+                <button onclick="setAccess('OPEN')" style="background: #003300; color: #0f0; border: 1px solid #0f0; padding: 5px 10px; cursor: pointer;">ALLOW GUESTS</button>
+                <button onclick="setAccess('LOCKED')" style="background: #330000; color: red; border: 1px solid red; padding: 5px 10px; cursor: pointer;">⚠ LOCK GUESTS</button>
+            </div>
+
         </div>
     </div>
 
@@ -223,7 +224,6 @@
 
     <script>
         // --- CONFIGURATION ---
-        // We use a free public broker for testing. Replace with HiveMQ later.
         const mqtt_broker = 'wss://broker.emqx.io:8084/mqtt'; 
         const topic_pub = 'dustu/control';
         const topic_sub = 'dustu/telemetry';
@@ -238,23 +238,57 @@
             statusBadge.style.color = "#0f0";
             statusBadge.style.borderColor = "#0f0";
             log("Connected to Cloud Broker Successfully.");
+            
+            // IMPORTANT: Tell the website to listen to the AI!
+            client.subscribe(topic_pub); 
+            document.getElementById("ai-status").innerText = "SYSTEM ONLINE";
+            document.getElementById("ai-status").style.color = "#0f0";
         });
 
+        // --- LISTENING FOR AI MESSAGES ---
         client.on('message', function (topic, message) {
-            // This runs when the Robot sends data BACK to us
-            log(`[ROBOT]: ${message.toString()}`);
+            let msg = message.toString();
+            log(`[CLOUD]: ${msg}`); // Print everything to the terminal box
+
+            // If the message is a Sorting Command
+            if (topic === topic_pub) {
+                let aiDashboard = document.getElementById("ai-status");
+                
+                if (msg === "DRY") {
+                    aiDashboard.innerText = "SORTING DRY 🧃";
+                    aiDashboard.style.color = "yellow";
+                    
+                    // Reset back to "SYSTEM ONLINE" after 4 seconds
+                    setTimeout(() => { 
+                        aiDashboard.innerText = "SYSTEM ONLINE"; 
+                        aiDashboard.style.color = "#0f0"; 
+                    }, 4000);
+                } 
+                else if (msg === "WET") {
+                    aiDashboard.innerText = "SORTING WET 🍎";
+                    aiDashboard.style.color = "cyan";
+                    
+                    // Reset back to "SYSTEM ONLINE" after 4 seconds
+                    setTimeout(() => { 
+                        aiDashboard.innerText = "SYSTEM ONLINE"; 
+                        aiDashboard.style.color = "#0f0"; 
+                    }, 4000);
+                }
+            }
         });
 
         // --- COMMAND FUNCTIONS ---
         function move(direction) {
-            // F = Forward, B = Back, L = Left, R = Right, S = Stop
             client.publish(topic_pub, direction);
-            log(`SENT MOVE: ${direction}`);
         }
 
         function sendCommand(cmd) {
             client.publish(topic_pub, cmd);
-            log(`SENT CMD: ${cmd}`);
+        }
+
+        function setAccess(state) {
+            client.publish('dustu/system/access', state);
+            log(`ACCESS LEVEL SET TO: ${state}`);
         }
 
         // --- LOGGING HELPER ---
@@ -266,7 +300,7 @@
 
         // --- KEYBOARD SUPPORT (WASD) ---
         document.addEventListener('keydown', (e) => {
-            if(e.repeat) return; // Prevent spamming while holding key
+            if(e.repeat) return; 
             if(e.key === 'w' || e.key === 'W') move('F');
             if(e.key === 's' || e.key === 'S') move('B');
             if(e.key === 'a' || e.key === 'A') move('L');
