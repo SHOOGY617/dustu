@@ -277,38 +277,53 @@
             }
         });
 
-        // --- COMMAND FUNCTIONS ---
+     // --- COMMAND FUNCTIONS ---
+        let driveInterval = null; // Stores our heartbeat timer
+
         function move(direction) {
             client.publish(topic_pub, direction);
+            // We don't log every pulse to avoid spamming the terminal box
+        }
+
+        // Starts the heartbeat when you press down
+        function startMove(direction) {
+            if (driveInterval) return; // Prevent double-triggering
+            
+            log(`STARTING MOTORS: ${direction}`);
+            move(direction); // Send immediately
+            
+            // Send the command again every 200ms
+            driveInterval = setInterval(() => {
+                move(direction);
+            }, 200); 
+        }
+
+        // Stops the heartbeat when you let go
+        function stopMove() {
+            if (driveInterval) {
+                clearInterval(driveInterval);
+                driveInterval = null;
+                move('S'); // Send the official STOP command
+                log(`STOPPING MOTORS`);
+            }
         }
 
         function sendCommand(cmd) {
             client.publish(topic_pub, cmd);
+            log(`SENT CMD: ${cmd}`);
         }
 
-        function setAccess(state) {
-            client.publish('dustu/system/access', state);
-            log(`ACCESS LEVEL SET TO: ${state}`);
-        }
-
-        // --- LOGGING HELPER ---
-        function log(msg) {
-            const time = new Date().toLocaleTimeString();
-            logBox.innerHTML += `<div><span style="color:#666">[${time}]</span> ${msg}</div>`;
-            logBox.scrollTop = logBox.scrollHeight; // Auto scroll
-        }
-
-        // --- KEYBOARD SUPPORT (WASD) ---
+        // --- NEW KEYBOARD SUPPORT (PULSING) ---
         document.addEventListener('keydown', (e) => {
-            if(e.repeat) return; 
-            if(e.key === 'w' || e.key === 'W') move('F');
-            if(e.key === 's' || e.key === 'S') move('B');
-            if(e.key === 'a' || e.key === 'A') move('L');
-            if(e.key === 'd' || e.key === 'D') move('R');
+            if(e.repeat) return; // Ignore built-in OS key repeats
+            if(e.key === 'w' || e.key === 'W') startMove('F');
+            if(e.key === 's' || e.key === 'S') startMove('B');
+            if(e.key === 'a' || e.key === 'A') startMove('L');
+            if(e.key === 'd' || e.key === 'D') startMove('R');
         });
 
         document.addEventListener('keyup', (e) => {
-            if(['w','a','s','d','W','A','S','D'].includes(e.key)) move('S');
+            if(['w','a','s','d','W','A','S','D'].includes(e.key)) stopMove();
         });
 
     </script>
