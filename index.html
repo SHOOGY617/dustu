@@ -540,7 +540,7 @@
         }
 
         function sendCommand(cmd) { client.publish(topic_pub, cmd); }
-        function setAccess(state) { client.publish(topic_sys, state); }
+        function setAccess(state) { client.publish(topic_sys, state, { retain: true }); }
 
         function logTerminal(msg) {
             const term = document.getElementById('terminal-log');
