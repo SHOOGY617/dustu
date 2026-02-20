@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DUSTU.TECH | The Chaos Crew</title>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
@@ -22,18 +23,20 @@
             --alert-red: #ff3333;
         }
 
+        /* Prevent pull-to-refresh and bounce scrolling on mobile */
         body {
             background-color: var(--bg);
             color: var(--card);
             font-family: 'Space Grotesk', sans-serif;
             margin: 0;
             overflow-x: hidden;
-            overflow-y: hidden; /* Prevent scrolling while locked */
+            overflow-y: hidden; 
+            overscroll-behavior-y: none; 
             cursor: crosshair;
         }
 
         /* --- VIEW MANAGER --- */
-        .view { display: none; }
+        .view { display: none; width: 100vw; height: 100vh; overflow-y: auto; }
         .view.active-block { display: block; }
         .view.active-flex { display: flex; }
         .view.active-grid { display: grid; }
@@ -49,12 +52,12 @@
 
         .modal-box {
             background: var(--card); border: 3px dashed var(--highlight);
-            padding: 40px; border-radius: 15px; text-align: center;
+            padding: 40px 20px; border-radius: 15px; text-align: center;
             box-shadow: 0 10px 0 rgba(0,0,0,0.5), 0 0 30px rgba(229, 49, 112, 0.2);
-            max-width: 350px; width: 90%;
+            max-width: 350px; width: 85%;
         }
         .modal-box h3 { font-family: 'Press Start 2P', cursive; color: var(--head); font-size: 1.2rem; margin-top: 0; }
-        .modal-box p { color: var(--para); font-size: 0.9rem; margin-bottom: 20px; }
+        .modal-box p { color: var(--para); font-size: 0.8rem; margin-bottom: 20px; }
         .modal-box input {
             background: var(--bg); border: 2px solid var(--secondary); color: var(--card);
             padding: 15px; border-radius: 8px; font-family: 'Space Grotesk', sans-serif;
@@ -62,7 +65,7 @@
         }
         .modal-box input:focus { border-color: var(--highlight); box-shadow: 0 0 15px rgba(229, 49, 112, 0.5); }
         .modal-box .error-msg { color: var(--btn); font-family: 'Press Start 2P', cursive; font-size: 0.6rem; margin-top: 15px; display: none; }
-        .modal-btn-group { margin-top: 25px; display: flex; justify-content: center; gap: 15px; }
+        .modal-btn-group { margin-top: 25px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;}
 
         /* --- GLOBAL COMPONENTS --- */
         .audio-btn {
@@ -76,80 +79,105 @@
         /* --- VIEW: HOME --- */
         #view-home { position: relative; z-index: 2; padding-bottom: 50px; }
         .container { max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
-        header { text-align: center; margin-bottom: 80px; padding-top: 50px; }
+        header { text-align: center; margin-bottom: 60px; padding-top: 30px; }
         h1 { font-family: 'Press Start 2P', cursive; color: var(--head); font-size: 3rem; text-shadow: 4px 4px 0px var(--highlight); margin-bottom: 10px;}
         .subtitle {
-            font-size: 1.2rem; color: var(--para); max-width: 600px; margin: 20px auto;
-            background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px;
+            font-size: 1rem; color: var(--para); max-width: 600px; margin: 20px auto;
+            background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px;
             border: 2px dashed var(--secondary); opacity: 0;
         }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
         .card {
-            background: var(--card); padding: 30px; border-radius: 15px; text-align: center;
+            background: var(--card); padding: 25px; border-radius: 15px; text-align: center;
             border: 2px solid transparent; transition: all 0.3s ease; box-shadow: 0 10px 0 rgba(0,0,0,0.3); opacity: 0;
         }
-        .card:hover { transform: translateY(-10px) rotate(2deg); border-color: var(--highlight); z-index: 10; }
-        .card h3 { color: var(--head); margin: 10px 0; font-size: 1.5rem; }
-        .card p { color: var(--para); font-size: 0.9rem; }
+        .card:hover { transform: translateY(-5px); border-color: var(--highlight); z-index: 10; }
+        .card h3 { color: var(--head); margin: 10px 0; font-size: 1.3rem; }
+        .card p { color: var(--para); font-size: 0.85rem; }
         .role-tag { display: inline-block; background: var(--highlight); color: white; padding: 5px 10px; border-radius: 50px; font-size: 0.7rem; font-weight: bold; margin-bottom: 10px; }
         .card.leader { background: var(--secondary); border: 4px solid var(--card); }
         .card.leader h3, .card.leader p { color: var(--bg); }
         .card.leader .role-tag { background: var(--bg); color: var(--secondary); }
 
         #dino-container {
-            position: fixed; bottom: -300px; right: 5%; width: 200px; height: 250px;
+            position: fixed; bottom: -300px; right: 5%; width: 150px; height: auto;
             z-index: 1000; pointer-events: none; transition: bottom 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
         }
         #dino-img { width: 100%; filter: drop-shadow(0px 0px 10px var(--highlight)); }
         .speech-bubble {
-            position: absolute; top: -60px; left: -50px; background: white; color: black;
-            padding: 10px 15px; border-radius: 20px; font-family: 'Press Start 2P', cursive; font-size: 0.7rem; display: none;
+            position: absolute; top: -60px; left: -20px; background: white; color: black;
+            padding: 10px 15px; border-radius: 20px; font-family: 'Press Start 2P', cursive; font-size: 0.6rem; display: none; width: max-content; max-width: 150px;
         }
 
         /* --- VIEWS: CONSOLE & LIVE (Shared Control Styles) --- */
         .sys-header {
             border-bottom: 2px solid var(--secondary); display: flex; justify-content: space-between;
-            align-items: center; padding: 10px 20px; background: rgba(0,0,0,0.5); font-family: 'Press Start 2P', monospace;
+            align-items: center; padding: 10px; background: rgba(0,0,0,0.5); font-family: 'Press Start 2P', monospace;
         }
-        .return-btn { background: none; border: 1px solid var(--highlight); color: var(--highlight); padding: 5px 10px; cursor: pointer; font-family: inherit; font-size: 0.6rem;}
+        .return-btn { background: none; border: 1px solid var(--highlight); color: var(--highlight); padding: 5px 8px; cursor: pointer; font-family: inherit; font-size: 0.6rem;}
         .return-btn:hover { background: var(--highlight); color: var(--card); }
         
-        .vid-container { border: 2px solid #333; background: #000; position: relative; display: flex; justify-content: center; align-items: center; }
-        .vid-container iframe { width: 100%; height: 100%; border: none; }
-        .overlay-text { position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.7); padding: 5px; color: var(--neon-green); font-family: 'Courier New'; font-size: 12px; pointer-events: none; }
+        .vid-container { border: 2px solid #333; background: #000; position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+        .vid-container iframe { width: 100%; height: 100%; border: none; object-fit: cover; }
+        .overlay-text { position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.7); padding: 5px; color: var(--neon-green); font-family: 'Courier New'; font-size: 10px; pointer-events: none; }
 
-        .d-pad { display: grid; grid-template-columns: 60px 60px 60px; grid-template-rows: 60px 60px; gap: 5px; margin: 20px auto; width: 190px;}
-        .d-btn { background: #111; border: 1px solid var(--secondary); color: var(--secondary); font-size: 20px; cursor: pointer; border-radius: 8px; }
-        .d-btn:active { background: var(--secondary); color: #000; }
+        /* THE D-PAD (MOBILE OPTIMIZED) */
+        .d-pad { 
+            display: grid; grid-template-columns: 70px 70px 70px; grid-template-rows: 70px 70px; 
+            gap: 8px; margin: 20px auto; width: max-content;
+        }
+        .d-btn { 
+            background: #111; border: 2px solid var(--secondary); color: var(--secondary); 
+            font-size: 24px; cursor: pointer; border-radius: 12px; 
+            
+            /* CRITICAL FOR MOBILE: Stops double-tap zoom, scrolling, and text highlighting */
+            touch-action: none; 
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .d-btn:active { background: var(--secondary); color: #000; transform: scale(0.95); }
         .btn-up { grid-column: 2; grid-row: 1; }
         .btn-left { grid-column: 1; grid-row: 2; }
         .btn-down { grid-column: 2; grid-row: 2; }
         .btn-right { grid-column: 3; grid-row: 2; }
 
         /* --- VIEW: LIVE (Guest) --- */
-        #view-live { flex-direction: column; height: 100vh; background: #050505;}
-        #view-live .vid-container { height: 50vh; width: 100%; border-bottom: 2px solid var(--secondary); }
-        .guest-controls { padding: 20px; display: flex; flex-direction: column; align-items: center; width: 100%; font-family: 'Courier New'; color: var(--secondary); }
+        #view-live { flex-direction: column; overflow: hidden; background: #050505;}
+        #view-live .vid-container { height: 45vh; width: 100%; border-bottom: 2px solid var(--secondary); }
+        .guest-controls { padding: 10px; display: flex; flex-direction: column; align-items: center; width: 100%; font-family: 'Courier New'; color: var(--secondary); flex: 1; justify-content: center;}
         .locked-controls { opacity: 0.3; pointer-events: none; filter: grayscale(100%); }
         .blink-red { color: var(--alert-red); animation: blink 1s infinite; font-weight: bold; }
-        @keyframes blink { 50% { opacity: 0; } }
 
         /* --- VIEW: CONSOLE (Admin) --- */
-        #view-console { grid-template-rows: 60px 1fr 150px; height: 100vh; background: #050505; color: var(--neon-green); font-family: 'Courier New'; }
-        .console-main { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; padding: 10px; overflow: hidden; }
-        .admin-controls { background: #0a0a0a; border: 1px solid #333; padding: 15px; display: flex; flex-direction: column; align-items: center; overflow-y: auto;}
+        #view-console { grid-template-rows: 50px 1fr 120px; overflow: hidden; background: #050505; color: var(--neon-green); font-family: 'Courier New'; }
+        .console-main { display: grid; grid-template-columns: 2fr 1fr; gap: 0; padding: 0; overflow: hidden; }
+        .admin-controls { background: #0a0a0a; border-left: 1px solid #333; padding: 10px; display: flex; flex-direction: column; align-items: center; overflow-y: auto;}
         
-        .ai-dashboard { width: 90%; text-align: center; border: 1px dashed var(--secondary); padding: 10px; background: #001100; margin-bottom: 15px;}
+        .ai-dashboard { width: 100%; text-align: center; border: 1px dashed var(--secondary); padding: 10px 0; background: #001100; margin-bottom: 10px; box-sizing: border-box;}
         .actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; margin-top: 10px; }
-        .action-btn { padding: 10px; background: #111; border: 1px solid var(--alert-red); color: var(--alert-red); cursor: pointer; font-weight: bold; font-family: 'Courier New'; font-size: 0.8rem;}
-        .action-btn:hover { background: var(--alert-red); color: #000; }
+        .action-btn { padding: 12px 5px; background: #111; border: 1px solid var(--alert-red); color: var(--alert-red); cursor: pointer; font-weight: bold; font-family: 'Courier New'; font-size: 0.7rem; border-radius: 5px; touch-action: manipulation;}
+        .action-btn:active { background: var(--alert-red); color: #000; }
         .action-btn.safe { border-color: cyan; color: cyan; }
-        .action-btn.safe:hover { background: cyan; color: #000; }
+        .action-btn.safe:active { background: cyan; color: #000; }
 
-        .terminal { border-top: 2px solid #333; background: #000; padding: 10px; font-size: 12px; overflow-y: auto; color: var(--neon-green); }
+        .terminal { border-top: 2px solid #333; background: #000; padding: 10px; font-size: 10px; overflow-y: auto; color: var(--neon-green); }
 
+        /* --- MOBILE RESPONSIVE TWEAKS --- */
         @media (max-width: 768px) {
-            .console-main { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+            h1 { font-size: 2.2rem; }
+            .sys-header span { font-size: 0.6rem; }
+            
+            /* Admin Console Stacks vertically on phone */
+            #view-console { grid-template-rows: 50px 1fr; } /* Hide terminal on mobile to save space, or make it small */
+            .console-main { grid-template-columns: 1fr; grid-template-rows: 35vh 1fr; }
+            .admin-controls { border-left: none; border-top: 2px solid #333; padding-bottom: 20px;}
+            
+            .terminal { display: none; } /* Hide terminal on mobile so D-Pad fits on screen */
+            
+            /* Make D-pad slightly smaller for small phones if needed, but 70px usually fits well */
+            .d-pad { gap: 10px; margin: 10px auto;}
+            .d-btn { font-size: 20px; }
         }
     </style>
 </head>
@@ -158,7 +186,7 @@
     <div id="site-entry-modal">
         <div class="modal-box" id="site-entry-box">
             <h3 style="color: var(--highlight);">SYSTEM LOCKED</h3>
-            <p>ENTER ACCESS KEY TO VIEW DUSTU PROJECT</p>
+            <p>ENTER ACCESS KEY</p>
             <input type="password" id="site-password" placeholder="***" autofocus>
             <div class="error-msg" id="site-error">INVALID KEY.</div>
             <div class="modal-btn-group">
@@ -201,14 +229,14 @@
                     <p><strong>PROJECT: DUSTU </strong></p>
                     <button onclick="switchView('view-live')" style="
                         border: 2px solid var(--secondary); color: var(--secondary);
-                        padding: 10px 20px; font-family: 'Press Start 2P', cursive; font-size: 0.7rem;
-                        margin-top: 20px; background: rgba(44, 182, 125, 0.1); cursor: pointer;
+                        padding: 12px 20px; font-family: 'Press Start 2P', cursive; font-size: 0.7rem;
+                        margin-top: 15px; background: rgba(44, 182, 125, 0.1); cursor: pointer; border-radius: 8px;
                     ">🔴 GUEST PILOT MODE</button>
-                    <p style="margin-top: 20px;">A semi-autonomous robot that eats trash, sorts it using YOLOv8 AI, and sometimes questions its own existence.</p>
+                    <p style="margin-top: 20px; font-size: 0.9rem;">A semi-autonomous robot that eats trash, sorts it using YOLOv8 AI, and sometimes questions its own existence.</p>
                 </div>
             </header>
 
-            <h2 style="text-align: center; color: var(--highlight); font-family: 'Press Start 2P'; margin-bottom: 40px;">THE SQUAD</h2>
+            <h2 style="text-align: center; color: var(--highlight); font-family: 'Press Start 2P'; margin-bottom: 30px; font-size: 1.2rem;">THE SQUAD</h2>
 
             <div class="grid">
                 <div class="card leader" onmouseover="dinoRoast('shlok')">
@@ -282,7 +310,7 @@
 
     <div id="view-live" class="view">
         <div class="sys-header">
-            <span style="color: var(--secondary); font-size: 0.8rem;">DUSTU // GUEST PILOT</span>
+            <span style="color: var(--secondary);">DUSTU // GUEST</span>
             <button class="return-btn" onclick="switchView('view-home')">⏏ DISCONNECT</button>
         </div>
         
@@ -292,22 +320,22 @@
         </div>
 
         <div id="guest-deck" class="guest-controls">
-            <div id="guest-status-msg">SYSTEM: ONLINE // READY FOR INPUT</div>
+            <div id="guest-status-msg" style="font-size: 0.8rem; margin-bottom: 10px;">SYSTEM: READY</div>
             <div class="d-pad">
-                <button class="d-btn btn-up" onmousedown="startMove('F')" onmouseup="stopMove()" ontouchstart="startMove('F')" ontouchend="stopMove()">▲</button>
-                <button class="d-btn btn-left" onmousedown="startMove('L')" onmouseup="stopMove()" ontouchstart="startMove('L')" ontouchend="stopMove()">◄</button>
-                <button class="d-btn btn-down" onmousedown="startMove('B')" onmouseup="stopMove()" ontouchstart="startMove('B')" ontouchend="stopMove()">▼</button>
-                <button class="d-btn btn-right" onmousedown="startMove('R')" onmouseup="stopMove()" ontouchstart="startMove('R')" ontouchend="stopMove()">►</button>
+                <button class="d-btn btn-up" onpointerdown="startMove('F')" onpointerup="stopMove()" onpointercancel="stopMove()" oncontextmenu="event.preventDefault();">▲</button>
+                <button class="d-btn btn-left" onpointerdown="startMove('L')" onpointerup="stopMove()" onpointercancel="stopMove()" oncontextmenu="event.preventDefault();">◄</button>
+                <button class="d-btn btn-down" onpointerdown="startMove('B')" onpointerup="stopMove()" onpointercancel="stopMove()" oncontextmenu="event.preventDefault();">▼</button>
+                <button class="d-btn btn-right" onpointerdown="startMove('R')" onpointerup="stopMove()" onpointercancel="stopMove()" oncontextmenu="event.preventDefault();">►</button>
             </div>
-            <div style="font-size: 10px; opacity: 0.5; margin-top: 20px;">GUEST ACCESS LEVEL: LIMITED<br>NO LID CONTROL / NO AUDIO</div>
+            <div style="font-size: 0.6rem; opacity: 0.5; margin-top: 10px; text-align: center;">GUEST ACCESS LEVEL: LIMITED<br>NO LID CONTROL</div>
         </div>
     </div>
 
     <div id="view-console" class="view">
         <div class="sys-header">
-            <span style="color: var(--neon-green); font-size: 0.8rem;">DUSTU_OS <span style="font-size: 10px;">v2.0</span></span>
+            <span style="color: var(--neon-green);">DUSTU_OS</span>
             <div>
-                <span id="admin-mqtt-status" style="color: var(--alert-red); font-size: 0.6rem; margin-right: 15px;">BROKER: OFFLINE</span>
+                <span id="admin-mqtt-status" style="color: var(--alert-red); font-size: 0.5rem; margin-right: 10px;">OFFLINE</span>
                 <button class="return-btn" onclick="switchView('view-home')">⏏ LOGOUT</button>
             </div>
         </div>
@@ -315,20 +343,20 @@
         <div class="console-main">
             <div class="vid-container">
                 <iframe src="https://vdo.ninja/?view=dustu_cam_01&cleanoutput=1&autoplay=1" allow="autoplay; camera;"></iframe>
-                <div class="overlay-text">CAM_1: ONLINE<br>LATENCY: ~12ms</div>
+                <div class="overlay-text">CAM_1: ONLINE</div>
             </div>
 
             <div class="admin-controls">
                 <div class="ai-dashboard">
-                    <div style="font-size: 10px; color: #aaa; margin-bottom: 5px;">YOLOv8 VISION AI</div>
-                    <div id="ai-status" style="font-size: 18px; font-weight: bold; color: yellow;">WAITING...</div>
+                    <div style="font-size: 0.6rem; color: #aaa; margin-bottom: 5px;">YOLOv8 VISION</div>
+                    <div id="ai-status" style="font-size: 1.2rem; font-weight: bold; color: yellow;">WAITING...</div>
                 </div>
 
                 <div class="d-pad">
-                    <button class="d-btn btn-up" onmousedown="startMove('F')" onmouseup="stopMove()" ontouchstart="startMove('F')" ontouchend="stopMove()">W</button>
-                    <button class="d-btn btn-left" onmousedown="startMove('L')" onmouseup="stopMove()" ontouchstart="startMove('L')" ontouchend="stopMove()">A</button>
-                    <button class="d-btn btn-down" onmousedown="startMove('B')" onmouseup="stopMove()" ontouchstart="startMove('B')" ontouchend="stopMove()">S</button>
-                    <button class="d-btn btn-right" onmousedown="startMove('R')" onmouseup="stopMove()" ontouchstart="startMove('R')" ontouchend="stopMove()">D</button>
+                    <button class="d-btn btn-up" onpointerdown="startMove('F')" onpointerup="stopMove()" onpointercancel="stopMove()" oncontextmenu="event.preventDefault();">W</button>
+                    <button class="d-btn btn-left" onpointerdown="startMove('L')" onpointerup="stopMove()" onpointercancel="stopMove()" oncontextmenu="event.preventDefault();">A</button>
+                    <button class="d-btn btn-down" onpointerdown="startMove('B')" onpointerup="stopMove()" onpointercancel="stopMove()" oncontextmenu="event.preventDefault();">S</button>
+                    <button class="d-btn btn-right" onpointerdown="startMove('R')" onpointerup="stopMove()" onpointercancel="stopMove()" oncontextmenu="event.preventDefault();">D</button>
                 </div>
 
                 <div class="actions-grid">
@@ -338,10 +366,10 @@
                     <button class="action-btn" style="color: cyan; border-color: cyan;" onclick="sendCommand('WET')">TEST WET</button>
                 </div>
 
-                <div style="margin-top: 20px; border-top: 1px solid #333; padding-top: 15px; width: 100%; text-align: center;">
-                    <div style="font-size: 10px; margin-bottom: 10px;">GUEST OVERRIDE</div>
-                    <button onclick="setAccess('OPEN')" style="background: #003300; color: #0f0; border: 1px solid #0f0; padding: 5px 10px; cursor: pointer; font-family: inherit;">UNLOCK</button>
-                    <button onclick="setAccess('LOCKED')" style="background: #330000; color: red; border: 1px solid red; padding: 5px 10px; cursor: pointer; font-family: inherit;">LOCK</button>
+                <div style="margin-top: 15px; border-top: 1px solid #333; padding-top: 10px; width: 100%; text-align: center;">
+                    <div style="font-size: 0.6rem; margin-bottom: 5px;">GUEST OVERRIDE</div>
+                    <button onclick="setAccess('OPEN')" style="background: #003300; color: #0f0; border: 1px solid #0f0; padding: 8px; cursor: pointer; font-family: inherit; font-size: 0.7rem; border-radius: 4px;">UNLOCK</button>
+                    <button onclick="setAccess('LOCKED')" style="background: #330000; color: red; border: 1px solid red; padding: 8px; cursor: pointer; font-family: inherit; font-size: 0.7rem; border-radius: 4px; margin-left: 5px;">LOCK</button>
                 </div>
             </div>
         </div>
@@ -358,18 +386,19 @@
 
         // --- 1. SPA VIEW SWITCHER ---
         function switchView(viewId) {
-            // Hide all views
             document.querySelectorAll('.view').forEach(v => {
                 v.classList.remove('active-block', 'active-flex', 'active-grid');
             });
 
-            // Show target view based on its layout needs
             const target = document.getElementById(viewId);
             if (viewId === 'view-home') target.classList.add('active-block');
             else if (viewId === 'view-live') target.classList.add('active-flex');
             else if (viewId === 'view-console') target.classList.add('active-grid');
 
-            // Handle scrolling & Dino visibility
+            // Force scroll to top when changing views
+            window.scrollTo(0, 0);
+            
+            // Allow scrolling on home, lock scrolling on dashboards
             document.body.style.overflowY = (viewId === 'view-home') ? 'auto' : 'hidden';
             document.getElementById('dino-container').style.display = (viewId === 'view-home') ? 'block' : 'none';
             
@@ -407,7 +436,6 @@
             anime({ targets: boxId, translateX: [0, -10, 10, -10, 10, 0], duration: 400, easing: 'easeInOutSine' });
         }
 
-        // Enter key listeners
         document.getElementById('site-password').addEventListener('keypress', e => { if (e.key === 'Enter') checkSitePassword(); });
         document.getElementById('admin-password').addEventListener('keypress', e => { if (e.key === 'Enter') checkAdminPassword(); });
 
@@ -432,7 +460,7 @@
         const bubble = document.getElementById('dino-text');
 
         function popUpDino(textOverride) {
-            if(currentActiveView !== 'view-home') return; // Don't interrupt driving!
+            if(currentActiveView !== 'view-home') return; 
             bubble.innerText = textOverride || "Sorting Waste... Beep Boop.";
             dino.style.bottom = "0px";
             setTimeout(() => { bubble.style.display = "block"; }, 300);
@@ -459,7 +487,7 @@
         let driveInterval = null;
 
         client.on('connect', () => {
-            document.getElementById('admin-mqtt-status').innerText = "BROKER: ONLINE";
+            document.getElementById('admin-mqtt-status').innerText = "ONLINE";
             document.getElementById('admin-mqtt-status').style.color = "#0f0";
             document.getElementById("ai-status").innerText = "SYSTEM ONLINE";
             document.getElementById("ai-status").style.color = "#0f0";
@@ -470,25 +498,22 @@
         client.on('message', (topic, message) => {
             const msg = message.toString();
             
-            // Log everything to admin console
             if(topic === topic_pub || topic === topic_sys) logTerminal(`[${topic.split('/').pop().toUpperCase()}]: ${msg}`);
 
-            // Handle Admin Overrides for Guests
             if (topic === topic_sys) {
                 const guestDeck = document.getElementById('guest-deck');
                 const guestMsg = document.getElementById('guest-status-msg');
                 if (msg === "LOCKED") {
                     guestDeck.classList.add("locked-controls");
-                    guestMsg.innerHTML = "⚠ OVERRIDE ACTIVE: ADMIN HAS CONTROL";
+                    guestMsg.innerHTML = "⚠ ADMIN HAS CONTROL";
                     guestMsg.classList.add("blink-red");
                 } else if (msg === "OPEN") {
                     guestDeck.classList.remove("locked-controls");
-                    guestMsg.innerHTML = "SYSTEM: ONLINE // READY FOR INPUT";
+                    guestMsg.innerHTML = "SYSTEM: READY";
                     guestMsg.classList.remove("blink-red");
                 }
             }
 
-            // Handle AI YOLOv8 Sorting Updates
             if (topic === topic_pub) {
                 let aiDashboard = document.getElementById("ai-status");
                 if (msg === "DRY" || msg === "WET") {
@@ -499,7 +524,7 @@
             }
         });
 
-        // Motor Heartbeat System
+        // Mobile Safe Motor Control
         function startMove(direction) {
             if (driveInterval) return; 
             client.publish(topic_pub, direction);
@@ -514,19 +539,20 @@
             }
         }
 
-        // Generic Commands & Admin Overrides
         function sendCommand(cmd) { client.publish(topic_pub, cmd); }
         function setAccess(state) { client.publish(topic_sys, state); }
 
         function logTerminal(msg) {
             const term = document.getElementById('terminal-log');
-            const newLog = document.createElement('div');
-            newLog.innerText = `> ${msg}`;
-            term.appendChild(newLog);
-            term.scrollTop = term.scrollHeight; // Auto-scroll
+            if(term) {
+                const newLog = document.createElement('div');
+                newLog.innerText = `> ${msg}`;
+                term.appendChild(newLog);
+                term.scrollTop = term.scrollHeight; 
+            }
         }
 
-        // Keyboard Drive Control (Only when looking at a live console)
+        // Keyboard Drive Control 
         document.addEventListener('keydown', (e) => {
             if(e.repeat || currentActiveView === 'view-home') return;
             const key = e.key.toLowerCase();
