@@ -6,8 +6,8 @@
     <title>DUSTU.TECH | The Chaos Crew</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
-    <a href="#" onclick="adminLogin()" style="color: #666; text-decoration: none; margin-left: 15px; font-size: 12px;">[ADMIN_LOGIN]</a>
-    
+    <a href="#" onclick="adminLogin()" style="color: #666; text-decoration: none; margin-left: 15px; font-size: 12px; cursor: pointer; position: relative; z-index: 10;">[ADMIN_LOGIN]</a>
+
     <style>
         :root {
             --bg: #0f0e17;
@@ -26,19 +26,34 @@
             font-family: 'Space Grotesk', sans-serif;
             margin: 0;
             overflow-x: hidden;
-            cursor: crosshair; /* Adds to the gamer vibe */
+            overflow-y: hidden; /* Prevent scrolling while locked */
+            cursor: crosshair;
         }
 
-        /* --- THE PEEKING DINO (Ollivere Style) --- */
+        /* --- SITE ENTRY LOCK SCREEN --- */
+        #site-entry-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: var(--bg); /* Solid background to hide content */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        /* --- THE PEEKING DINO --- */
         #dino-container {
             position: fixed;
-            bottom: -300px; /* Hidden start */
+            bottom: -300px; 
             right: 5%;
             width: 200px;
             height: 250px;
             z-index: 1000;
-            pointer-events: none; /* Let clicks pass through unless active */
-            transition: bottom 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* Bouncy */
+            pointer-events: none; 
+            transition: bottom 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55); 
         }
 
         #dino-img {
@@ -47,7 +62,6 @@
             filter: drop-shadow(0px 0px 10px var(--highlight));
         }
 
-        /* Bubbles for Dino speech */
         .speech-bubble {
             position: absolute;
             top: -60px;
@@ -58,9 +72,9 @@
             border-radius: 20px;
             font-family: 'Press Start 2P', cursive;
             font-size: 0.7rem;
-            display: none; /* Hidden by default */
+            display: none; 
         }
-        
+
         .speech-bubble:after {
             content: '';
             position: absolute;
@@ -106,6 +120,7 @@
             padding: 20px;
             border-radius: 12px;
             border: 2px dashed var(--secondary);
+            opacity: 0; /* Hidden for animation */
         }
 
         /* --- TEAM GRID --- */
@@ -124,6 +139,7 @@
             border: 2px solid transparent;
             transition: all 0.3s ease;
             box-shadow: 0 10px 0 rgba(0,0,0,0.3);
+            opacity: 0; /* Hidden for animation */
         }
 
         .card:hover {
@@ -190,9 +206,107 @@
             opacity: 0.1;
         }
 
+        /* --- MODAL STYLES (Used for both Lock Screen and Admin) --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 14, 23, 0.9);
+            display: none; 
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-box {
+            background: #232946;
+            border: 3px dashed var(--highlight);
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 0 rgba(0,0,0,0.5), 0 0 30px rgba(229, 49, 112, 0.2);
+            max-width: 350px;
+            width: 90%;
+            position: relative;
+        }
+
+        .modal-box h3 {
+            font-family: 'Press Start 2P', cursive;
+            color: var(--head);
+            font-size: 1.2rem;
+            margin-top: 0;
+        }
+
+        .modal-box p {
+            color: var(--para);
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        .modal-box input {
+            background: var(--bg);
+            border: 2px solid var(--secondary);
+            color: var(--card);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Space Grotesk', sans-serif;
+            width: 80%;
+            text-align: center;
+            font-size: 1.2rem;
+            outline: none;
+            letter-spacing: 3px;
+            transition: all 0.3s ease;
+        }
+
+        .modal-box input:focus {
+            border-color: var(--highlight);
+            box-shadow: 0 0 15px rgba(229, 49, 112, 0.5);
+        }
+
+        .modal-box .error-msg {
+            color: var(--btn);
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .modal-btn-group {
+            margin-top: 25px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
     </style>
 </head>
 <body>
+
+    <div id="site-entry-modal" style="display: flex;"> <div class="modal-box" id="site-entry-box">
+            <h3 style="color: var(--highlight);">SYSTEM LOCKED</h3>
+            <p>ENTER ACCESS KEY TO VIEW DUSTU PROJECT</p>
+            <input type="password" id="site-password" placeholder="***" autofocus>
+            <div class="error-msg" id="site-error">INVALID KEY.</div>
+            <div class="modal-btn-group">
+                <button class="audio-btn" onclick="checkSitePassword()">UNLOCK</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="admin-modal" class="modal-overlay">
+        <div class="modal-box" id="admin-modal-box">
+            <h3>SYS_ADMIN</h3>
+            <p>ENTER COMMAND CODE:</p>
+            <input type="password" id="admin-password" placeholder="***">
+            <div class="error-msg" id="admin-error">ACCESS DENIED.</div>
+            <div class="modal-btn-group">
+                <button class="audio-btn" onclick="checkAdminPassword()">EXECUTE</button>
+                <button class="audio-btn" style="background: #232946; color: var(--para); border: 2px solid var(--para); box-shadow: none;" onclick="closeAdminModal()">ABORT</button>
+            </div>
+        </div>
+    </div>
 
     <div class="bg-shape" style="top: 10%; left: 5%; font-size: 10rem;">✖</div>
     <div class="bg-shape" style="top: 50%; right: 10%; font-size: 8rem;">●</div>
@@ -232,7 +346,7 @@
         <h2 style="text-align: center; color: var(--highlight); font-family: 'Press Start 2P'; margin-bottom: 40px;">THE SQUAD</h2>
 
         <div class="grid">
-            
+
             <div class="card leader" onmouseover="dinoRoast('shlok')">
                 <span class="role-tag">The Boss</span>
                 <h3>Shlok Agrawal</h3>
@@ -311,33 +425,64 @@
     <audio id="audio-shlok" src="shlok.mp3"></audio>
 
     <script>
-        // --- 1. ANIMATIONS (Entrance) ---
-        anime.timeline({loop: false})
-        .add({
-            targets: '.ml15 .word',
-            scale: [14,1],
-            opacity: [0,1],
-            easing: "easeOutCirc",
-            duration: 800,
-            delay: (el, i) => 800 * i
-        }).add({
-            targets: '.subtitle',
-            translateY: [20, 0],
-            opacity: [0, 1],
-            duration: 600
-        }).add({
-            targets: '.card',
-            translateY: [50, 0],
-            opacity: [0, 1],
-            delay: anime.stagger(100), // Cards appear one by one
-            easing: 'spring(1, 80, 10, 0)'
+        // --- 1. SITE LOCK LOGIC ---
+        function checkSitePassword() {
+            const pwd = document.getElementById('site-password').value;
+            
+            if (pwd === "chaoscrew") { // <--- CHANGE SITE PASSWORD HERE
+                // Hide lock screen
+                document.getElementById('site-entry-modal').style.display = 'none';
+                // Re-enable scrolling
+                document.body.style.overflowY = 'auto';
+                // Trigger the main site animations
+                startSiteAnimations();
+            } else {
+                // Show error and shake
+                document.getElementById('site-error').style.display = 'block';
+                anime({
+                    targets: '#site-entry-box',
+                    translateX: [0, -10, 10, -10, 10, 0],
+                    duration: 400,
+                    easing: 'easeInOutSine'
+                });
+            }
+        }
+
+        // Allow pressing "Enter" to submit the site password
+        document.getElementById('site-password').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') checkSitePassword();
         });
 
-        // --- 2. DINO PEEK LOGIC ---
+
+        // --- 2. ANIMATIONS (Entrance) ---
+        // Wrapped in a function so it only fires after the site is unlocked
+        function startSiteAnimations() {
+            anime.timeline({loop: false})
+            .add({
+                targets: '.ml15 .word',
+                scale: [14,1],
+                opacity: [0,1],
+                easing: "easeOutCirc",
+                duration: 800,
+                delay: (el, i) => 800 * i
+            }).add({
+                targets: '.subtitle',
+                translateY: [20, 0],
+                opacity: [0, 1],
+                duration: 600
+            }).add({
+                targets: '.card',
+                translateY: [50, 0],
+                opacity: [0, 1],
+                delay: anime.stagger(100), 
+                easing: 'spring(1, 80, 10, 0)'
+            });
+        }
+
+        // --- 3. DINO PEEK LOGIC ---
         const dino = document.getElementById('dino-container');
         const bubble = document.getElementById('dino-text');
-        
-        // Random phrases the robot/dino says
+
         const phrases = [
             "Sorting Waste...",
             "Who are you?",
@@ -355,95 +500,79 @@
         ];
 
         function popUpDino() {
-            // Pick random text
             bubble.innerText = phrases[Math.floor(Math.random() * phrases.length)];
-            
-            // Show Dino
             dino.style.bottom = "0px";
             setTimeout(() => { bubble.style.display = "block"; }, 300);
 
-            // Hide after 4 seconds
             setTimeout(() => {
                 bubble.style.display = "none";
                 dino.style.bottom = "-300px";
             }, 4000);
         }
 
-        // Trigger every 8 seconds automatically
         setInterval(popUpDino, 8000);
-
-        // Also trigger when clicking the header
         document.querySelector('header').addEventListener('click', popUpDino);
 
 
-        // --- 3. AUDIO PLAYER ---
+        // --- 4. AUDIO & ROAST PLAYER ---
         function playNoise(name) {
-            // Stop others
             document.querySelectorAll('audio').forEach(a => { a.pause(); a.currentTime = 0; });
-            
-            // Play selected
             const sound = document.getElementById('audio-' + name);
             if (sound) {
                 sound.play().catch(e => alert("Please add " + name + ".mp3 to your folder!"));
-                
-                // Animate the button being clicked
+                anime({ targets: event.target, scale: [1, 0.9, 1], duration: 200 });
+            }
+        }
+
+        const teamRoasts = {
+            'shlok': "Shlok is the kind of guy who’d sell his soul for 75% attendance and still fail.",
+            'arpit': "Arpit's future is as stable as the hostel Wi-Fi.",
+            'priyansh': "Priyansh is the reason the group project has a 'Part 2' next year.",
+            'krishna': "Krishna's code is 90% Stack Overflow, 10% prayers.",
+            'vansh': "Vansh is a specialist in doing nothing and still feeling tired.",
+            'yash': "Yash spent 4 hours picking a color. It's still gray."
+        };
+
+        function dinoRoast(name) {
+            bubble.innerText = teamRoasts[name] || "Who is this human?";
+            dino.style.bottom = "0px";
+            bubble.style.display = "block";
+            setTimeout(() => {
+                dino.style.bottom = "-300px";
+                bubble.style.display = "none";
+            }, 3500);
+        }
+
+        // --- 5. CUSTOM ADMIN LOGIN LOGIC ---
+        function adminLogin() {
+            document.getElementById('admin-modal').style.display = 'flex';
+            document.getElementById('admin-error').style.display = 'none'; 
+            document.getElementById('admin-password').value = ''; 
+            setTimeout(() => document.getElementById('admin-password').focus(), 50); 
+        }
+
+        function closeAdminModal() {
+            document.getElementById('admin-modal').style.display = 'none';
+        }
+
+        function checkAdminPassword() {
+            const password = document.getElementById('admin-password').value;
+            if (password === "dustu123") { 
+                window.location.href = "console.html";
+            } else {
+                document.getElementById('admin-error').style.display = 'block';
                 anime({
-                    targets: event.target,
-                    scale: [1, 0.9, 1],
-                    duration: 200
+                    targets: '#admin-modal-box',
+                    translateX: [0, -10, 10, -10, 10, 0],
+                    duration: 400,
+                    easing: 'easeInOutSine'
                 });
             }
         }
-        const teamRoasts = {
-    'shlok': "Shlok is the kind of guy who’d sell his soul for 75% attendance and still fail.",
-    'arpit': "Arpit's future is as stable as the hostel Wi-Fi.",
-    'priyansh': "Priyansh is the reason the group project has a 'Part 2' next year.",
-    'krishna': "Krishna's code is 90% Stack Overflow, 10% prayers.",
-    'vansh': "Vansh is a specialist in doing nothing and still feeling tired.",
-    'yash': "Yash spent 4 hours picking a color. It's still gray."
-    };
 
-        function dinoRoast(name) {
-        const dino = document.getElementById('dino-container');
-        const bubble = document.getElementById('dino-text');
-    
-    // Set the roast based on the name passed
-        bubble.innerText = teamRoasts[name] || "Who is this human?";
-    
-        // Pop up effect
-        dino.style.bottom = "0px";
-        bubble.style.display = "block";
-
-        // Stay up a bit longer for them to read the roast
-        setTimeout(() => {
-        dino.style.bottom = "-300px";
-        bubble.style.display = "none";
-    }, 3500);
-}
+        document.getElementById('admin-password').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') checkAdminPassword();
+        });
     </script>
-    <script>
-    function adminLogin() {
-        const password = prompt("ENTER COMMAND CODE:");
-        if (password === "dustu123") { // CHANGE THIS PASSWORD
-            window.location.href = "console.html";
-        } else {
-            alert("ACCESS DENIED.");
-        }
-    }
-</script>
 </body>
-
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
