@@ -407,7 +407,7 @@
 
         // --- 2. AUTHENTICATION (Site & Admin) ---
         function checkSitePassword() {
-            if (document.getElementById('site-password').value === "chaoscrew") {
+            if (document.getElementById('site-password').value === "1302") {
                 document.getElementById('site-entry-modal').style.display = 'none';
                 document.body.style.overflowY = 'auto';
                 startSiteAnimations();
@@ -424,7 +424,7 @@
         function closeAdminModal() { document.getElementById('admin-modal').style.display = 'none'; }
 
         function checkAdminPassword() {
-            if (document.getElementById('admin-password').value === "dustu123") {
+            if (document.getElementById('admin-password').value === "2026") {
                 closeAdminModal();
                 switchView('view-console');
                 logTerminal("SYS_ADMIN Shlok connected.");
