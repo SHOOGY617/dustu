@@ -6,6 +6,7 @@
     <title>DUSTU.TECH | The Chaos Crew</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/nipplejs/0.10.1/nipplejs.min.js"></script>
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
 
@@ -353,10 +354,7 @@
                 </div>
 
                 <div class="d-pad">
-                    <button class="d-btn btn-up" onpointerdown="startMove('F')" onpointerup="stopMove()" onpointercancel="stopMove()" oncontextmenu="event.preventDefault();">W</button>
-                    <button class="d-btn btn-left" onpointerdown="startMove('L')" onpointerup="stopMove()" onpointercancel="stopMove()" oncontextmenu="event.preventDefault();">A</button>
-                    <button class="d-btn btn-down" onpointerdown="startMove('B')" onpointerup="stopMove()" onpointercancel="stopMove()" oncontextmenu="event.preventDefault();">S</button>
-                    <button class="d-btn btn-right" onpointerdown="startMove('R')" onpointerup="stopMove()" onpointercancel="stopMove()" oncontextmenu="event.preventDefault();">D</button>
+                   <div class="joystick-zone" style="position: relative; width: 200px; height: 200px; margin: 0 auto;"></div>
                 </div>
 
                 <div class="actions-grid">
@@ -566,6 +564,58 @@
             if(currentActiveView === 'view-home') return;
             if(['w','a','s','d'].includes(e.key.toLowerCase())) stopMove();
         });
+        // --- 5. ANALOG VIRTUAL JOYSTICK ---
+let joyX = 0;
+let joyY = 0;
+let isJoyActive = false;
+
+// Create the Joysticks for all elements with class 'joystick-zone'
+const joystickOptions = {
+    zone: document.querySelector('.joystick-zone'), // You'll need to init this per view if using multiple, or just target the active one.
+    mode: 'static',
+    position: { left: '50%', top: '50%' },
+    color: '#2cb67d',
+    size: 150
+};
+
+// Initialize nipple.js on all zones
+document.querySelectorAll('.joystick-zone').forEach(zone => {
+    let manager = nipplejs.create({ ...joystickOptions, zone: zone });
+
+    manager.on('move', (evt, data) => {
+        isJoyActive = true;
+        // vector.y is naturally positive going up in nipple.js
+        joyX = data.vector.x; 
+        joyY = data.vector.y; 
+    });
+
+    manager.on('end', () => {
+        isJoyActive = false;
+        joyX = 0;
+        joyY = 0;
+        sendCommand("M:0:0"); // Hard stop
+    });
+});
+
+// The Transmitter Loop (Runs every 150ms to feed the Arduino Watchdog)
+setInterval(() => {
+    if (isJoyActive) {
+        // Tank Drive Math Algorithm
+        // Maps X,Y to Left and Right Motor Speeds (-255 to 255)
+        let left = (joyY + joyX) * 255;
+        let right = (joyY - joyX) * 255;
+
+        // Normalize so we don't exceed the 255 limit on tight diagonal turns
+        let max = Math.max(Math.abs(left), Math.abs(right));
+        if (max > 255) {
+            left = (left / max) * 255;
+            right = (right / max) * 255;
+        }
+
+        // Send the formatted string over MQTT
+        sendCommand(`M:${Math.round(left)}:${Math.round(right)}`);
+    }
+}, 150);
 
     </script>
     <script>
