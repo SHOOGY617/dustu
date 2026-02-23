@@ -390,14 +390,15 @@
             else if (viewId === 'view-live') target.classList.add('active-flex');
             else if (viewId === 'view-console') target.classList.add('active-grid');
 
-            // Force scroll to top when changing views
             window.scrollTo(0, 0);
             
-            // Allow scrolling on home, lock scrolling on dashboards
             document.body.style.overflowY = (viewId === 'view-home') ? 'auto' : 'hidden';
             document.getElementById('dino-container').style.display = (viewId === 'view-home') ? 'block' : 'none';
             
             currentActiveView = viewId;
+
+            // NEW: Build the joystick safely AFTER the view is visible!
+            setTimeout(() => { initJoystick(viewId); }, 50);
         }
 
         // --- 2. AUTHENTICATION (Site & Admin) ---
