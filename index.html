@@ -520,30 +520,36 @@
             }
         });
 
-        // Mobile Safe Motor Control
-        // Mobile Safe Motor Control
-        function startMove(direction) {
-            if (driveInterval) return; 
+        // Keyboard Drive Control 
+        document.addEventListener('keydown', (e) => {
+            if(e.repeat || currentActiveView === 'view-home') return;
+            const key = e.key.toLowerCase();
             
             // Map the old directions to the new Analog math!
-            let cmd = "M:0:0";
-            if (direction === 'F') cmd = "M:255:255";
-            if (direction === 'B') cmd = "M:-255:-255";
-            if (direction === 'L') cmd = "M:-255:255"; // Tank steer left
-            if (direction === 'R') cmd = "M:255:-255"; // Tank steer right
+            let cmd = null;
+            if (key === 'w') cmd = "M:255:255";
+            if (key === 's') cmd = "M:-255:-255";
+            if (key === 'a') cmd = "M:-255:255"; // Tank steer left
+            if (key === 'd') cmd = "M:255:-255"; // Tank steer right
 
-            client.publish(topic_pub, cmd);
-            // Send heartbeat every 150ms to feed the Arduino Latency Watchdog
-            driveInterval = setInterval(() => client.publish(topic_pub, cmd), 150); 
-        }
-
-        function stopMove() {
-            if (driveInterval) {
-                clearInterval(driveInterval);
-                driveInterval = null;
-                client.publish(topic_pub, "M:0:0"); // Hard Stop command
+            if (cmd) {
+                if (driveInterval) return; 
+                client.publish(topic_pub, cmd);
+                // Send heartbeat every 150ms to feed the Arduino Latency Watchdog
+                driveInterval = setInterval(() => client.publish(topic_pub, cmd), 150); 
             }
-        }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if(currentActiveView === 'view-home') return;
+            if(['w','a','s','d'].includes(e.key.toLowerCase())) {
+                if (driveInterval) {
+                    clearInterval(driveInterval);
+                    driveInterval = null;
+                    client.publish(topic_pub, "M:0:0"); // Hard Stop command
+                }
+            }
+        });
 
         function sendCommand(cmd) { client.publish(topic_pub, cmd); }
         function setAccess(state) { client.publish(topic_sys, state, { retain: true }); }
@@ -558,72 +564,77 @@
             }
         }
 
-        // Keyboard Drive Control 
-        document.addEventListener('keydown', (e) => {
-            if(e.repeat || currentActiveView === 'view-home') return;
-            const key = e.key.toLowerCase();
-            if(key === 'w') startMove('F');
-            if(key === 's') startMove('B');
-            if(key === 'a') startMove('L');
-            if(key === 'd') startMove('R');
-        });
-
-        document.addEventListener('keyup', (e) => {
-            if(currentActiveView === 'view-home') return;
-            if(['w','a','s','d'].includes(e.key.toLowerCase())) stopMove();
-        });
         // --- 5. ANALOG VIRTUAL JOYSTICK ---
-let joyX = 0;
-let joyY = 0;
-let isJoyActive = false;
+        let joyX = 0;
+        let joyY = 0;
+        let isJoyActive = false;
+        let joystickManager = null; // Keeps track of the active joystick
 
-// Create the Joysticks for all elements with class 'joystick-zone'
-const joystickOptions = {
-    zone: document.querySelector('.joystick-zone'), // You'll need to init this per view if using multiple, or just target the active one.
-    mode: 'static',
-    position: { left: '50%', top: '50%' },
-    color: '#2cb67d',
-    size: 150
-};
+        // This dynamically builds the joystick only when a screen opens
+        function initJoystick(viewId) {
+            // 1. Destroy any old broken joysticks
+            if (joystickManager) {
+                joystickManager.destroy();
+                joystickManager = null;
+            }
 
-// Initialize nipple.js on all zones
-document.querySelectorAll('.joystick-zone').forEach(zone => {
-    let manager = nipplejs.create({ ...joystickOptions, zone: zone });
+            // 2. Find the zone in the CURRENT view
+            const activeView = document.getElementById(viewId);
+            if (!activeView) return;
+            const zone = activeView.querySelector('.joystick-zone');
 
-    manager.on('move', (evt, data) => {
-        isJoyActive = true;
-        // vector.y is naturally positive going up in nipple.js
-        joyX = data.vector.x; 
-        joyY = data.vector.y; 
-    });
+            // If there's no joystick on this screen (like the Home screen), stop here.
+            if (!zone) return;
 
-    manager.on('end', () => {
-        isJoyActive = false;
-        joyX = 0;
-        joyY = 0;
-        sendCommand("M:0:0"); // Hard stop
-    });
-});
+            // 3. Build it! (Now that the div actually has a size)
+            joystickManager = nipplejs.create({
+                zone: zone,
+                mode: 'static',
+                position: { left: '50%', top: '50%' },
+                color: '#2cb67d',
+                size: 150
+            });
 
-// The Transmitter Loop (Runs every 150ms to feed the Arduino Watchdog)
-setInterval(() => {
-    if (isJoyActive) {
-        // Tank Drive Math Algorithm
-        // Maps X,Y to Left and Right Motor Speeds (-255 to 255)
-        let left = (joyY + joyX) * 255;
-        let right = (joyY - joyX) * 255;
+            // 4. Read the thumb movements
+            joystickManager.on('move', (evt, data) => {
+                isJoyActive = true;
+                
+                // The joystick size is 150, so the max radius is 75 pixels
+                let radius = 75; 
+                
+                // Calculate how far the stick is pushed (0.0 to 1.0)
+                let intensity = Math.min(data.distance / radius, 1.0);
+                
+                // Multiply the direction by the intensity!
+                joyX = data.vector.x * intensity; 
+                joyY = data.vector.y * intensity; 
+            });
 
-        // Normalize so we don't exceed the 255 limit on tight diagonal turns
-        let max = Math.max(Math.abs(left), Math.abs(right));
-        if (max > 255) {
-            left = (left / max) * 255;
-            right = (right / max) * 255;
+            joystickManager.on('end', () => {
+                isJoyActive = false;
+                joyX = 0;
+                joyY = 0;
+                sendCommand("M:0:0"); // Hard stop
+            });
         }
 
-        // Send the formatted string over MQTT
-        sendCommand(`M:${Math.round(left)}:${Math.round(right)}`);
-    }
-}, 150);
+        // The Transmitter Loop (Sends data to Arduino every 150ms)
+        setInterval(() => {
+            if (isJoyActive) {
+                // Tank Drive Math Algorithm
+                let left = (joyY + joyX) * 255;
+                let right = (joyY - joyX) * 255;
+
+                // Normalize so we don't exceed the 255 limit on tight diagonal turns
+                let max = Math.max(Math.abs(left), Math.abs(right));
+                if (max > 255) {
+                    left = (left / max) * 255;
+                    right = (right / max) * 255;
+                }
+
+                sendCommand(`M:${Math.round(left)}:${Math.round(right)}`);
+            }
+        }, 150);
 
     </script>
     <script>
