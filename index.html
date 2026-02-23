@@ -323,10 +323,7 @@
         <div id="guest-deck" class="guest-controls">
             <div id="guest-status-msg" style="font-size: 0.8rem; margin-bottom: 10px;">SYSTEM: READY</div>
             <div class="d-pad">
-                <button class="d-btn btn-up" onpointerdown="startMove('F')" onpointerup="stopMove()" onpointercancel="stopMove()" oncontextmenu="event.preventDefault();">▲</button>
-                <button class="d-btn btn-left" onpointerdown="startMove('L')" onpointerup="stopMove()" onpointercancel="stopMove()" oncontextmenu="event.preventDefault();">◄</button>
-                <button class="d-btn btn-down" onpointerdown="startMove('B')" onpointerup="stopMove()" onpointercancel="stopMove()" oncontextmenu="event.preventDefault();">▼</button>
-                <button class="d-btn btn-right" onpointerdown="startMove('R')" onpointerup="stopMove()" onpointercancel="stopMove()" oncontextmenu="event.preventDefault();">►</button>
+                <div class="joystick-zone" style="position: relative; width: 200px; height: 200px; margin: 0 auto;"></div>
             </div>
             <div style="font-size: 0.6rem; opacity: 0.5; margin-top: 10px; text-align: center;">GUEST ACCESS LEVEL: LIMITED<br>NO LID CONTROL</div>
         </div>
@@ -523,17 +520,27 @@
         });
 
         // Mobile Safe Motor Control
+        // Mobile Safe Motor Control
         function startMove(direction) {
             if (driveInterval) return; 
-            client.publish(topic_pub, direction);
-            driveInterval = setInterval(() => client.publish(topic_pub, direction), 200); 
+            
+            // Map the old directions to the new Analog math!
+            let cmd = "M:0:0";
+            if (direction === 'F') cmd = "M:255:255";
+            if (direction === 'B') cmd = "M:-255:-255";
+            if (direction === 'L') cmd = "M:-255:255"; // Tank steer left
+            if (direction === 'R') cmd = "M:255:-255"; // Tank steer right
+
+            client.publish(topic_pub, cmd);
+            // Send heartbeat every 150ms to feed the Arduino Latency Watchdog
+            driveInterval = setInterval(() => client.publish(topic_pub, cmd), 150); 
         }
 
         function stopMove() {
             if (driveInterval) {
                 clearInterval(driveInterval);
                 driveInterval = null;
-                client.publish(topic_pub, 'S');
+                client.publish(topic_pub, "M:0:0"); // Hard Stop command
             }
         }
 
