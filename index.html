@@ -528,7 +528,8 @@
         function startMove(direction) {
             if (driveInterval) return; 
             client.publish(topic_pub, direction);
-            driveInterval = setInterval(() => client.publish(topic_pub, direction), 200); 
+            driveInterval = setInterval(() => client.publish(topic_pub, direction);
+              }, 200); 
         }
 
         function stopMove() {
