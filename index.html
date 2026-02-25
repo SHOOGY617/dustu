@@ -1,589 +1,589 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DUSTU.TECH | The Chaos Crew</title>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
-    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DUSTU.TECH | The Chaos Crew</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
 
-    <style>
-        :root {
-            --bg: #0f0e17;
-            --card: #232946;
-            --head: #ff8906;
-            --para: #a7a9be;
-            --btn: #f25f4c;
-            --btn-text: #fffffe;
-            --highlight: #e53170;
-            --secondary: #2cb67d;
-            --neon-green: #0f0;
-            --alert-red: #ff3333;
-        }
+    <style>
+        :root {
+            --bg: #0f0e17;
+            --card: #232946;
+            --head: #ff8906;
+            --para: #a7a9be;
+            --btn: #f25f4c;
+            --btn-text: #fffffe;
+            --highlight: #e53170;
+            --secondary: #2cb67d;
+            --neon-green: #0f0;
+            --alert-red: #ff3333;
+        }
 
-        /* Prevent pull-to-refresh and bounce scrolling on mobile */
-        body {
-            background-color: var(--bg);
-            color: var(--card);
-            font-family: 'Space Grotesk', sans-serif;
-            margin: 0;
-            overflow-x: hidden;
-            overflow-y: hidden; 
-            overscroll-behavior-y: none; 
-            cursor: crosshair;
-        }
+        /* Prevent pull-to-refresh and bounce scrolling on mobile */
+        body {
+            background-color: var(--bg);
+            color: var(--card);
+            font-family: 'Space Grotesk', sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+            overflow-y: hidden; 
+            overscroll-behavior-y: none; 
+            cursor: crosshair;
+        }
 
-        /* --- VIEW MANAGER --- */
-        .view { display: none; width: 100vw; height: 100vh; overflow-y: auto; }
-        .view.active-block { display: block; }
-        .view.active-flex { display: flex; }
-        .view.active-grid { display: grid; }
+        /* --- VIEW MANAGER --- */
+        .view { display: none; width: 100vw; height: 100vh; overflow-y: auto; }
+        .view.active-block { display: block; }
+        .view.active-flex { display: flex; }
+        .view.active-grid { display: grid; }
 
-        /* --- MODALS --- */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(15, 14, 23, 0.95);
-            display: none; justify-content: center; align-items: center;
-            z-index: 9999; backdrop-filter: blur(5px);
-        }
-        #site-entry-modal { display: flex; background: var(--bg); z-index: 10000; }
+        /* --- MODALS --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(15, 14, 23, 0.95);
+            display: none; justify-content: center; align-items: center;
+            z-index: 9999; backdrop-filter: blur(5px);
+        }
+        #site-entry-modal { display: flex; background: var(--bg); z-index: 10000; }
 
-        .modal-box {
-            background: var(--card); border: 3px dashed var(--highlight);
-            padding: 40px 20px; border-radius: 15px; text-align: center;
-            box-shadow: 0 10px 0 rgba(0,0,0,0.5), 0 0 30px rgba(229, 49, 112, 0.2);
-            max-width: 350px; width: 85%;
-        }
-        .modal-box h3 { font-family: 'Press Start 2P', cursive; color: var(--head); font-size: 1.2rem; margin-top: 0; }
-        .modal-box p { color: var(--para); font-size: 0.8rem; margin-bottom: 20px; }
-        .modal-box input {
-            background: var(--bg); border: 2px solid var(--secondary); color: var(--card);
-            padding: 15px; border-radius: 8px; font-family: 'Space Grotesk', sans-serif;
-            width: 80%; text-align: center; font-size: 1.2rem; outline: none; letter-spacing: 3px;
-        }
-        .modal-box input:focus { border-color: var(--highlight); box-shadow: 0 0 15px rgba(229, 49, 112, 0.5); }
-        .modal-box .error-msg { color: var(--btn); font-family: 'Press Start 2P', cursive; font-size: 0.6rem; margin-top: 15px; display: none; }
-        .modal-btn-group { margin-top: 25px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;}
+        .modal-box {
+            background: var(--card); border: 3px dashed var(--highlight);
+            padding: 40px 20px; border-radius: 15px; text-align: center;
+            box-shadow: 0 10px 0 rgba(0,0,0,0.5), 0 0 30px rgba(229, 49, 112, 0.2);
+            max-width: 350px; width: 85%;
+        }
+        .modal-box h3 { font-family: 'Press Start 2P', cursive; color: var(--head); font-size: 1.2rem; margin-top: 0; }
+        .modal-box p { color: var(--para); font-size: 0.8rem; margin-bottom: 20px; }
+        .modal-box input {
+            background: var(--bg); border: 2px solid var(--secondary); color: var(--card);
+            padding: 15px; border-radius: 8px; font-family: 'Space Grotesk', sans-serif;
+            width: 80%; text-align: center; font-size: 1.2rem; outline: none; letter-spacing: 3px;
+        }
+        .modal-box input:focus { border-color: var(--highlight); box-shadow: 0 0 15px rgba(229, 49, 112, 0.5); }
+        .modal-box .error-msg { color: var(--btn); font-family: 'Press Start 2P', cursive; font-size: 0.6rem; margin-top: 15px; display: none; }
+        .modal-btn-group { margin-top: 25px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;}
 
-        /* --- GLOBAL COMPONENTS --- */
-        .audio-btn {
-            background: var(--btn); color: var(--btn-text); border: none; padding: 10px 20px;
-            border-radius: 8px; font-family: 'Press Start 2P', cursive; font-size: 0.6rem;
-            cursor: pointer; transition: transform 0.1s; box-shadow: 0 4px 0 #8a2be2;
-        }
-        .audio-btn:active { transform: translateY(4px); box-shadow: none; }
-        .bg-shape { position: absolute; z-index: 0; opacity: 0.05; pointer-events: none; }
+        /* --- GLOBAL COMPONENTS --- */
+        .audio-btn {
+            background: var(--btn); color: var(--btn-text); border: none; padding: 10px 20px;
+            border-radius: 8px; font-family: 'Press Start 2P', cursive; font-size: 0.6rem;
+            cursor: pointer; transition: transform 0.1s; box-shadow: 0 4px 0 #8a2be2;
+        }
+        .audio-btn:active { transform: translateY(4px); box-shadow: none; }
+        .bg-shape { position: absolute; z-index: 0; opacity: 0.05; pointer-events: none; }
 
-        /* --- VIEW: HOME --- */
-        #view-home { position: relative; z-index: 2; padding-bottom: 50px; }
-        .container { max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
-        header { text-align: center; margin-bottom: 60px; padding-top: 30px; }
-        h1 { font-family: 'Press Start 2P', cursive; color: var(--head); font-size: 3rem; text-shadow: 4px 4px 0px var(--highlight); margin-bottom: 10px;}
-        .subtitle {
-            font-size: 1rem; color: var(--para); max-width: 600px; margin: 20px auto;
-            background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px;
-            border: 2px dashed var(--secondary); opacity: 0;
-        }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
-        .card {
-            background: var(--card); padding: 25px; border-radius: 15px; text-align: center;
-            border: 2px solid transparent; transition: all 0.3s ease; box-shadow: 0 10px 0 rgba(0,0,0,0.3); opacity: 0;
-        }
-        .card:hover { transform: translateY(-5px); border-color: var(--highlight); z-index: 10; }
-        .card h3 { color: var(--head); margin: 10px 0; font-size: 1.3rem; }
-        .card p { color: var(--para); font-size: 0.85rem; }
-        .role-tag { display: inline-block; background: var(--highlight); color: white; padding: 5px 10px; border-radius: 50px; font-size: 0.7rem; font-weight: bold; margin-bottom: 10px; }
-        .card.leader { background: var(--secondary); border: 4px solid var(--card); }
-        .card.leader h3, .card.leader p { color: var(--bg); }
-        .card.leader .role-tag { background: var(--bg); color: var(--secondary); }
+        /* --- VIEW: HOME --- */
+        #view-home { position: relative; z-index: 2; padding-bottom: 50px; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
+        header { text-align: center; margin-bottom: 60px; padding-top: 30px; }
+        h1 { font-family: 'Press Start 2P', cursive; color: var(--head); font-size: 3rem; text-shadow: 4px 4px 0px var(--highlight); margin-bottom: 10px;}
+        .subtitle {
+            font-size: 1rem; color: var(--para); max-width: 600px; margin: 20px auto;
+            background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px;
+            border: 2px dashed var(--secondary); opacity: 0;
+        }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+        .card {
+            background: var(--card); padding: 25px; border-radius: 15px; text-align: center;
+            border: 2px solid transparent; transition: all 0.3s ease; box-shadow: 0 10px 0 rgba(0,0,0,0.3); opacity: 0;
+        }
+        .card:hover { transform: translateY(-5px); border-color: var(--highlight); z-index: 10; }
+        .card h3 { color: var(--head); margin: 10px 0; font-size: 1.3rem; }
+        .card p { color: var(--para); font-size: 0.85rem; }
+        .role-tag { display: inline-block; background: var(--highlight); color: white; padding: 5px 10px; border-radius: 50px; font-size: 0.7rem; font-weight: bold; margin-bottom: 10px; }
+        .card.leader { background: var(--secondary); border: 4px solid var(--card); }
+        .card.leader h3, .card.leader p { color: var(--bg); }
+        .card.leader .role-tag { background: var(--bg); color: var(--secondary); }
 
-        #dino-container {
-            position: fixed; bottom: -300px; right: 5%; width: 150px; height: auto;
-            z-index: 1000; pointer-events: none; transition: bottom 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-        }
-        #dino-img { width: 100%; filter: drop-shadow(0px 0px 10px var(--highlight)); }
-        .speech-bubble {
-            position: absolute; top: -60px; left: -20px; background: white; color: black;
-            padding: 10px 15px; border-radius: 20px; font-family: 'Press Start 2P', cursive; font-size: 0.6rem; display: none; width: max-content; max-width: 150px;
-        }
+        #dino-container {
+            position: fixed; bottom: -300px; right: 5%; width: 150px; height: auto;
+            z-index: 1000; pointer-events: none; transition: bottom 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+        #dino-img { width: 100%; filter: drop-shadow(0px 0px 10px var(--highlight)); }
+        .speech-bubble {
+            position: absolute; top: -60px; left: -20px; background: white; color: black;
+            padding: 10px 15px; border-radius: 20px; font-family: 'Press Start 2P', cursive; font-size: 0.6rem; display: none; width: max-content; max-width: 150px;
+        }
 
-        /* --- VIEWS: CONSOLE & LIVE (Shared Control Styles) --- */
-        .sys-header {
-            border-bottom: 2px solid var(--secondary); display: flex; justify-content: space-between;
-            align-items: center; padding: 10px; background: rgba(0,0,0,0.5); font-family: 'Press Start 2P', monospace;
-        }
-        .return-btn { background: none; border: 1px solid var(--highlight); color: var(--highlight); padding: 5px 8px; cursor: pointer; font-family: inherit; font-size: 0.6rem;}
-        .return-btn:hover { background: var(--highlight); color: var(--card); }
-        
-        .vid-container { border: 2px solid #333; background: #000; position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; }
-        .vid-container iframe { width: 100%; height: 100%; border: none; object-fit: cover; }
-        .overlay-text { position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.7); padding: 5px; color: var(--neon-green); font-family: 'Courier New'; font-size: 10px; pointer-events: none; }
+        /* --- VIEWS: CONSOLE & LIVE (Shared Control Styles) --- */
+        .sys-header {
+            border-bottom: 2px solid var(--secondary); display: flex; justify-content: space-between;
+            align-items: center; padding: 10px; background: rgba(0,0,0,0.5); font-family: 'Press Start 2P', monospace;
+        }
+        .return-btn { background: none; border: 1px solid var(--highlight); color: var(--highlight); padding: 5px 8px; cursor: pointer; font-family: inherit; font-size: 0.6rem;}
+        .return-btn:hover { background: var(--highlight); color: var(--card); }
+        
+        .vid-container { border: 2px solid #333; background: #000; position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+        .vid-container iframe { width: 100%; height: 100%; border: none; object-fit: cover; }
+        .overlay-text { position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.7); padding: 5px; color: var(--neon-green); font-family: 'Courier New'; font-size: 10px; pointer-events: none; }
 
-        /* THE D-PAD (MOBILE OPTIMIZED) */
-        .d-pad { 
-            display: grid; grid-template-columns: 70px 70px 70px; grid-template-rows: 70px 70px; 
-            gap: 8px; margin: 20px auto; width: max-content;
-        }
-        .d-btn { 
-            background: #111; border: 2px solid var(--secondary); color: var(--secondary); 
-            font-size: 24px; cursor: pointer; border-radius: 12px; 
-            
-            /* CRITICAL FOR MOBILE: Stops double-tap zoom, scrolling, and text highlighting */
-            touch-action: none; 
-            user-select: none;
-            -webkit-user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .d-btn:active { background: var(--secondary); color: #000; transform: scale(0.95); }
-        .btn-up { grid-column: 2; grid-row: 1; }
-        .btn-left { grid-column: 1; grid-row: 2; }
-        .btn-down { grid-column: 2; grid-row: 2; }
-        .btn-right { grid-column: 3; grid-row: 2; }
+        /* THE D-PAD (MOBILE OPTIMIZED) */
+        .d-pad { 
+            display: grid; grid-template-columns: 70px 70px 70px; grid-template-rows: 70px 70px; 
+            gap: 8px; margin: 20px auto; width: max-content;
+        }
+        .d-btn { 
+            background: #111; border: 2px solid var(--secondary); color: var(--secondary); 
+            font-size: 24px; cursor: pointer; border-radius: 12px; 
+            
+            /* CRITICAL FOR MOBILE: Stops double-tap zoom, scrolling, and text highlighting */
+            touch-action: none; 
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .d-btn:active { background: var(--secondary); color: #000; transform: scale(0.95); }
+        .btn-up { grid-column: 2; grid-row: 1; }
+        .btn-left { grid-column: 1; grid-row: 2; }
+        .btn-down { grid-column: 2; grid-row: 2; }
+        .btn-right { grid-column: 3; grid-row: 2; }
 
-        /* --- VIEW: LIVE (Guest) --- */
-        #view-live { flex-direction: column; overflow: hidden; background: #050505;}
-        #view-live .vid-container { height: 45vh; width: 100%; border-bottom: 2px solid var(--secondary); }
-        .guest-controls { padding: 10px; display: flex; flex-direction: column; align-items: center; width: 100%; font-family: 'Courier New'; color: var(--secondary); flex: 1; justify-content: center;}
-        .locked-controls { opacity: 0.3; pointer-events: none; filter: grayscale(100%); }
-        .blink-red { color: var(--alert-red); animation: blink 1s infinite; font-weight: bold; }
+        /* --- VIEW: LIVE (Guest) --- */
+        #view-live { flex-direction: column; overflow: hidden; background: #050505;}
+        #view-live .vid-container { height: 45vh; width: 100%; border-bottom: 2px solid var(--secondary); }
+        .guest-controls { padding: 10px; display: flex; flex-direction: column; align-items: center; width: 100%; font-family: 'Courier New'; color: var(--secondary); flex: 1; justify-content: center;}
+        .locked-controls { opacity: 0.3; pointer-events: none; filter: grayscale(100%); }
+        .blink-red { color: var(--alert-red); animation: blink 1s infinite; font-weight: bold; }
 
-        /* --- VIEW: CONSOLE (Admin) --- */
-        #view-console { grid-template-rows: 50px 1fr 120px; overflow: hidden; background: #050505; color: var(--neon-green); font-family: 'Courier New'; }
-        .console-main { display: grid; grid-template-columns: 2fr 1fr; gap: 0; padding: 0; overflow: hidden; }
-        .admin-controls { background: #0a0a0a; border-left: 1px solid #333; padding: 10px; display: flex; flex-direction: column; align-items: center; overflow-y: auto;}
-        
-        .ai-dashboard { width: 100%; text-align: center; border: 1px dashed var(--secondary); padding: 10px 0; background: #001100; margin-bottom: 10px; box-sizing: border-box;}
-        .actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; margin-top: 10px; }
-        .action-btn { padding: 12px 5px; background: #111; border: 1px solid var(--alert-red); color: var(--alert-red); cursor: pointer; font-weight: bold; font-family: 'Courier New'; font-size: 0.7rem; border-radius: 5px; touch-action: manipulation;}
-        .action-btn:active { background: var(--alert-red); color: #000; }
-        .action-btn.safe { border-color: cyan; color: cyan; }
-        .action-btn.safe:active { background: cyan; color: #000; }
+        /* --- VIEW: CONSOLE (Admin) --- */
+        #view-console { grid-template-rows: 50px 1fr 120px; overflow: hidden; background: #050505; color: var(--neon-green); font-family: 'Courier New'; }
+        .console-main { display: grid; grid-template-columns: 2fr 1fr; gap: 0; padding: 0; overflow: hidden; }
+        .admin-controls { background: #0a0a0a; border-left: 1px solid #333; padding: 10px; display: flex; flex-direction: column; align-items: center; overflow-y: auto;}
+        
+        .ai-dashboard { width: 100%; text-align: center; border: 1px dashed var(--secondary); padding: 10px 0; background: #001100; margin-bottom: 10px; box-sizing: border-box;}
+        .actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; margin-top: 10px; }
+        .action-btn { padding: 12px 5px; background: #111; border: 1px solid var(--alert-red); color: var(--alert-red); cursor: pointer; font-weight: bold; font-family: 'Courier New'; font-size: 0.7rem; border-radius: 5px; touch-action: manipulation;}
+        .action-btn:active { background: var(--alert-red); color: #000; }
+        .action-btn.safe { border-color: cyan; color: cyan; }
+        .action-btn.safe:active { background: cyan; color: #000; }
 
-        .terminal { border-top: 2px solid #333; background: #000; padding: 10px; font-size: 10px; overflow-y: auto; color: var(--neon-green); }
+        .terminal { border-top: 2px solid #333; background: #000; padding: 10px; font-size: 10px; overflow-y: auto; color: var(--neon-green); }
 
-        /* --- MOBILE RESPONSIVE TWEAKS --- */
-        @media (max-width: 768px) {
-            h1 { font-size: 2.2rem; }
-            .sys-header span { font-size: 0.6rem; }
-            
-            /* Admin Console Stacks vertically on phone */
-            #view-console { grid-template-rows: 50px 1fr; } /* Hide terminal on mobile to save space, or make it small */
-            .console-main { grid-template-columns: 1fr; grid-template-rows: 35vh 1fr; }
-            .admin-controls { border-left: none; border-top: 2px solid #333; padding-bottom: 20px;}
-            
-            .terminal { display: none; } /* Hide terminal on mobile so D-Pad fits on screen */
-            
-            /* Make D-pad slightly smaller for small phones if needed, but 70px usually fits well */
-            .d-pad { gap: 10px; margin: 10px auto;}
-            .d-btn { font-size: 20px; }
-        }
-    </style>
+        /* --- MOBILE RESPONSIVE TWEAKS --- */
+        @media (max-width: 768px) {
+            h1 { font-size: 2.2rem; }
+            .sys-header span { font-size: 0.6rem; }
+            
+            /* Admin Console Stacks vertically on phone */
+            #view-console { grid-template-rows: 50px 1fr; } 
+            .console-main { grid-template-columns: 1fr; grid-template-rows: 35vh 1fr; }
+            .admin-controls { border-left: none; border-top: 2px solid #333; padding-bottom: 20px;}
+            
+            .terminal { display: none; } 
+            
+            .d-pad { gap: 10px; margin: 10px auto;}
+            .d-btn { font-size: 20px; }
+        }
+    </style>
 </head>
 <body>
 
-    <div id="site-entry-modal" class="modal-overlay" style="display: flex; background: var(--bg);">
-        <div class="modal-box" id="site-entry-box">
-            <h3 style="color: var(--highlight);">SYSTEM LOCKED</h3>
-            <p>ENTER ACCESS KEY</p>
-            <input type="password" id="site-password" placeholder="***" autofocus>
-            <div class="error-msg" id="site-error">INVALID KEY.</div>
-            <div class="modal-btn-group">
-                <button class="audio-btn" onclick="checkSitePassword()">UNLOCK</button>
-            </div>
-        </div>
-    </div>
+    <div id="site-entry-modal" class="modal-overlay" style="display: flex; background: var(--bg);">
+        <div class="modal-box" id="site-entry-box">
+            <h3 style="color: var(--highlight);">SYSTEM LOCKED</h3>
+            <p>ENTER ACCESS KEY</p>
+            <input type="password" id="site-password" placeholder="***" autofocus>
+            <div class="error-msg" id="site-error">INVALID KEY.</div>
+            <div class="modal-btn-group">
+                <button class="audio-btn" onclick="checkSitePassword()">UNLOCK</button>
+            </div>
+        </div>
+    </div>
 
-    <div id="admin-modal" class="modal-overlay">
-        <div class="modal-box" id="admin-modal-box">
-            <h3>SYS_ADMIN</h3>
-            <p>ENTER COMMAND CODE:</p>
-            <input type="password" id="admin-password" placeholder="***">
-            <div class="error-msg" id="admin-error">ACCESS DENIED.</div>
-            <div class="modal-btn-group">
-                <button class="audio-btn" onclick="checkAdminPassword()">EXECUTE</button>
-                <button class="audio-btn" style="background: var(--card); color: var(--bg); box-shadow: none;" onclick="closeAdminModal()">ABORT</button>
-            </div>
-        </div>
-    </div>
+    <div id="admin-modal" class="modal-overlay">
+        <div class="modal-box" id="admin-modal-box">
+            <h3>SYS_ADMIN</h3>
+            <p>ENTER COMMAND CODE:</p>
+            <input type="password" id="admin-password" placeholder="***">
+            <div class="error-msg" id="admin-error">ACCESS DENIED.</div>
+            <div class="modal-btn-group">
+                <button class="audio-btn" onclick="checkAdminPassword()">EXECUTE</button>
+                <button class="audio-btn" style="background: var(--card); color: var(--bg); box-shadow: none;" onclick="closeAdminModal()">ABORT</button>
+            </div>
+        </div>
+    </div>
 
-    <div id="dino-container">
-        <div class="speech-bubble" id="dino-text">SORTING TRASH... BEEP BOOP</div>
-        <img id="dino-img" src="dino.png" alt="Funny Dino">
-    </div>
+    <div id="dino-container">
+        <div class="speech-bubble" id="dino-text">SORTING TRASH... BEEP BOOP</div>
+        <img id="dino-img" src="dino.png" alt="Funny Dino">
+    </div>
 
-    <div id="view-home" class="view active-block">
-        <div class="bg-shape" style="top: 10%; left: 5%; font-size: 10rem;">✖</div>
-        <div class="bg-shape" style="top: 50%; right: 10%; font-size: 8rem;">●</div>
-        <div class="bg-shape" style="bottom: 10%; left: 20%; font-size: 12rem;">▲</div>
-        <a href="#" onclick="openAdminModal()" style="color: #666; text-decoration: none; margin: 15px; font-size: 12px; cursor: pointer; position: absolute; z-index: 10;">[ADMIN_LOGIN]</a>
+    <div id="view-home" class="view active-block">
+        <div class="bg-shape" style="top: 10%; left: 5%; font-size: 10rem;">✖</div>
+        <div class="bg-shape" style="top: 50%; right: 10%; font-size: 8rem;">●</div>
+        <div class="bg-shape" style="bottom: 10%; left: 20%; font-size: 12rem;">▲</div>
+        <a href="#" onclick="openAdminModal()" style="color: #666; text-decoration: none; margin: 15px; font-size: 12px; cursor: pointer; position: absolute; z-index: 10;">[ADMIN_LOGIN]</a>
 
-        <div class="container">
-            <header>
-                <h1 class="ml15">
-                    <span class="word">DUSTU</span>
-                    <span class="word">.TECH</span>
-                </h1>
-                <div class="subtitle">
-                    <p><strong>PROJECT: DUSTU </strong></p>
-                    <button onclick="switchView('view-live')" style="
-                        border: 2px solid var(--secondary); color: var(--secondary);
-                        padding: 12px 20px; font-family: 'Press Start 2P', cursive; font-size: 0.7rem;
-                        margin-top: 15px; background: rgba(44, 182, 125, 0.1); cursor: pointer; border-radius: 8px;
-                    ">🔴 GUEST PILOT MODE</button>
-                    <p style="margin-top: 20px; font-size: 0.9rem;">A semi-autonomous robot that eats trash, sorts it using YOLOv8 AI, and sometimes questions its own existence.</p>
-                </div>
-            </header>
+        <div class="container">
+            <header>
+                <h1 class="ml15">
+                    <span class="word">DUSTU</span>
+                    <span class="word">.TECH</span>
+                </h1>
+                <div class="subtitle">
+                    <p><strong>PROJECT: DUSTU </strong></p>
+                    <button onclick="switchView('view-live')" style="
+                        border: 2px solid var(--secondary); color: var(--secondary);
+                        padding: 12px 20px; font-family: 'Press Start 2P', cursive; font-size: 0.7rem;
+                        margin-top: 15px; background: rgba(44, 182, 125, 0.1); cursor: pointer; border-radius: 8px;
+                    ">🔴 GUEST PILOT MODE</button>
+                    <p style="margin-top: 20px; font-size: 0.9rem;">A semi-autonomous robot that eats trash, sorts it using YOLOv8 AI, and sometimes questions its own existence.</p>
+                </div>
+            </header>
 
-            <h2 style="text-align: center; color: var(--highlight); font-family: 'Press Start 2P'; margin-bottom: 30px; font-size: 1.2rem;">THE SQUAD</h2>
+            <h2 style="text-align: center; color: var(--highlight); font-family: 'Press Start 2P'; margin-bottom: 30px; font-size: 1.2rem;">THE SQUAD</h2>
 
-            <div class="grid">
-                <div class="card leader" onmouseover="dinoRoast('shlok')">
-                    <span class="role-tag">The Boss</span>
-                    <h3>Shlok Agrawal</h3>
-                    <p>Crashing, & Rebooting</p>
-                    <p style="font-size: 0.7rem; margin-top: 5px;">"It works on my machine (Arch btw)"</p>
-                    <button class="audio-btn" onclick="playNoise('shlok')">🔊 ERROR</button>
-                </div>
-                <div class="card" onmouseover="dinoRoast('arpit')">
-                    <span class="role-tag">Hardware</span>
-                    <h3>Arpit Kumar Dubey</h3>
-                    <p>Wiring & Sparks</p>
-                    <button class="audio-btn" onclick="playNoise('arpit')">🔊 ADMISSION REGRET</button>
-                </div>
-                <div class="card" onmouseover="dinoRoast('krishna')">
-                    <span class="role-tag">Integration</span>
-                    <h3>Krishna Singh</h3>
-                    <p>Making things fit</p>
-                    <button class="audio-btn" onclick="playNoise('krishna')">🔊 HEAR THIS</button>
-                </div>
-                <div class="card" onmouseover="dinoRoast('priyansh')">
-                    <span class="role-tag">Testing</span>
-                    <h3>Priyansh Sharma</h3>
-                    <p>Breaks things professionally</p>
-                    <button class="audio-btn" onclick="playNoise('priyansh')">🔊 SYSTEM CRASH</button>
-                </div>
-                <div class="card" onmouseover="dinoRoast('yash')">
-                    <span class="role-tag">Circuits</span>
-                    <h3>Yash Rana</h3>
-                    <p>Board Logic</p>
-                    <button class="audio-btn" onclick="playNoise('yash')">🔊 HEAR AUDIO</button>
-                </div>
-                <div class="card" onmouseover="dinoRoast('vansh')">
-                    <span class="role-tag">Research</span>
-                    <h3>Vansh Gupta</h3>
-                    <p>Googling stuff</p>
-                    <button class="audio-btn" onclick="playNoise('vansh')">🔊 Unfiltered</button>
-                </div>
-                <div class="card">
-                    <span class="role-tag">Power</span>
-                    <h3>Sani Jaiswal</h3>
-                    <p>Battery Manager</p>
-                    <button class="audio-btn" onclick="playNoise('sani')">🔊 LEAKED AUDIO</button>
-                </div>
-                <div class="card">
-                    <span class="role-tag">Docs</span>
-                    <h3>Poorvi Gupta</h3>
-                    <p>Writing the manual</p>
-                    <button class="audio-btn" onclick="playNoise('poorvi')">🔊 Classified</button>
-                </div>
-                <div class="card">
-                    <span class="role-tag">Design</span>
-                    <h3>Dweepraj Kaur</h3>
-                    <p>Makes it look cool</p>
-                    <button class="audio-btn" onclick="playNoise('dweepraj')">🔊 Missing File</button>
-                </div>
-            </div>
-        </div>
+            <div class="grid">
+                <div class="card leader" onmouseover="dinoRoast('shlok')">
+                    <span class="role-tag">The Boss</span>
+                    <h3>Shlok Agrawal</h3>
+                    <p>Crashing, & Rebooting</p>
+                    <p style="font-size: 0.7rem; margin-top: 5px;">"It works on my machine (Arch btw)"</p>
+                    <button class="audio-btn" onclick="playNoise('shlok')">🔊 ERROR</button>
+                </div>
+                <div class="card" onmouseover="dinoRoast('arpit')">
+                    <span class="role-tag">Hardware</span>
+                    <h3>Arpit Kumar Dubey</h3>
+                    <p>Wiring & Sparks</p>
+                    <button class="audio-btn" onclick="playNoise('arpit')">🔊 ADMISSION REGRET</button>
+                </div>
+                <div class="card" onmouseover="dinoRoast('krishna')">
+                    <span class="role-tag">Integration</span>
+                    <h3>Krishna Singh</h3>
+                    <p>Making things fit</p>
+                    <button class="audio-btn" onclick="playNoise('krishna')">🔊 HEAR THIS</button>
+                </div>
+                <div class="card" onmouseover="dinoRoast('priyansh')">
+                    <span class="role-tag">Testing</span>
+                    <h3>Priyansh Sharma</h3>
+                    <p>Breaks things professionally</p>
+                    <button class="audio-btn" onclick="playNoise('priyansh')">🔊 SYSTEM CRASH</button>
+                </div>
+                <div class="card" onmouseover="dinoRoast('yash')">
+                    <span class="role-tag">Circuits</span>
+                    <h3>Yash Rana</h3>
+                    <p>Board Logic</p>
+                    <button class="audio-btn" onclick="playNoise('yash')">🔊 HEAR AUDIO</button>
+                </div>
+                <div class="card" onmouseover="dinoRoast('vansh')">
+                    <span class="role-tag">Research</span>
+                    <h3>Vansh Gupta</h3>
+                    <p>Googling stuff</p>
+                    <button class="audio-btn" onclick="playNoise('vansh')">🔊 Unfiltered</button>
+                </div>
+                <div class="card">
+                    <span class="role-tag">Power</span>
+                    <h3>Sani Jaiswal</h3>
+                    <p>Battery Manager</p>
+                    <button class="audio-btn" onclick="playNoise('sani')">🔊 LEAKED AUDIO</button>
+                </div>
+                <div class="card">
+                    <span class="role-tag">Docs</span>
+                    <h3>Poorvi Gupta</h3>
+                    <p>Writing the manual</p>
+                    <button class="audio-btn" onclick="playNoise('poorvi')">🔊 Classified</button>
+                </div>
+                <div class="card">
+                    <span class="role-tag">Design</span>
+                    <h3>Dweepraj Kaur</h3>
+                    <p>Makes it look cool</p>
+                    <button class="audio-btn" onclick="playNoise('dweepraj')">🔊 Missing File</button>
+                </div>
+            </div>
+        </div>
 
-        <audio id="audio-arpit" src="arpit.mp3"></audio>
-        <audio id="audio-krishna" src="krishna.mp3"></audio>
-        <audio id="audio-priyansh" src="priyansh.mp3"></audio>
-        <audio id="audio-vansh" src="vansh.mp3"></audio>
-        <audio id="audio-yash" src="yash.mp3"></audio>
-        <audio id="audio-sani" src="sani.mp3"></audio>
-        <audio id="audio-poorvi" src="poorvi.mp3"></audio>
-        <audio id="audio-dweepraj" src="dweepraj.mp3"></audio>
-        <audio id="audio-shlok" src="shlok.mp3"></audio>
-    </div>
+        <audio id="audio-arpit" src="arpit.mp3"></audio>
+        <audio id="audio-krishna" src="krishna.mp3"></audio>
+        <audio id="audio-priyansh" src="priyansh.mp3"></audio>
+        <audio id="audio-vansh" src="vansh.mp3"></audio>
+        <audio id="audio-yash" src="yash.mp3"></audio>
+        <audio id="audio-sani" src="sani.mp3"></audio>
+        <audio id="audio-poorvi" src="poorvi.mp3"></audio>
+        <audio id="audio-dweepraj" src="dweepraj.mp3"></audio>
+        <audio id="audio-shlok" src="shlok.mp3"></audio>
+    </div>
 
-    <div id="view-live" class="view">
-        <div class="sys-header">
-            <span style="color: var(--secondary);">DUSTU // GUEST</span>
-            <button class="return-btn" onclick="switchView('view-home')">⏏ DISCONNECT</button>
-        </div>
-        
-        <div class="vid-container">
-            <iframe src="https://vdo.ninja/?view=dustu_cam_01&cleanoutput=1&autoplay=1&quality=30&bitrate=500&buffer=0" allow="autoplay; camera;"></iframe>
-            <div class="overlay-text">GUEST_CAM_FEED</div>
-        </div>
+    <div id="view-live" class="view">
+        <div class="sys-header">
+            <span style="color: var(--secondary);">DUSTU // GUEST</span>
+            <button class="return-btn" onclick="switchView('view-home')">⏏ DISCONNECT</button>
+        </div>
+        
+        <div class="vid-container">
+            <iframe src="https://vdo.ninja/?view=dustu_cam_01&cleanoutput=1&autoplay=1&quality=30&bitrate=500&buffer=0" allow="autoplay; camera;"></iframe>
+            <div class="overlay-text">GUEST_CAM_FEED</div>
+        </div>
 
-        <div id="guest-deck" class="guest-controls">
-            <div id="guest-status-msg" style="font-size: 0.8rem; margin-bottom: 10px;">SYSTEM: READY</div>
-            <div class="d-pad">
-                <button class="d-btn btn-up" onpointerdown="startMove('F')" onpointerup="stopMove()" onpointercancel="stopMove()" oncontextmenu="event.preventDefault();">▲</button>
-                <button class="d-btn btn-left" onpointerdown="startMove('L')" onpointerup="stopMove()" onpointercancel="stopMove()" oncontextmenu="event.preventDefault();">◄</button>
-                <button class="d-btn btn-down" onpointerdown="startMove('B')" onpointerup="stopMove()" onpointercancel="stopMove()" oncontextmenu="event.preventDefault();">▼</button>
-                <button class="d-btn btn-right" onpointerdown="startMove('R')" onpointerup="stopMove()" onpointercancel="stopMove()" oncontextmenu="event.preventDefault();">►</button>
-            </div>
-            <div style="font-size: 0.6rem; opacity: 0.5; margin-top: 10px; text-align: center;">GUEST ACCESS LEVEL: LIMITED<br>NO LID CONTROL</div>
-        </div>
-    </div>
+        <div id="guest-deck" class="guest-controls">
+            <div id="guest-status-msg" style="font-size: 0.8rem; margin-bottom: 10px;">SYSTEM: READY</div>
+            <div class="d-pad">
+                <button class="d-btn btn-up" onpointerdown="startMove('F')" onpointerup="stopMove()" onpointercancel="stopMove()" oncontextmenu="event.preventDefault();">▲</button>
+                <button class="d-btn btn-left" onpointerdown="startMove('L')" onpointerup="stopMove()" onpointercancel="stopMove()" oncontextmenu="event.preventDefault();">◄</button>
+                <button class="d-btn btn-down" onpointerdown="startMove('B')" onpointerup="stopMove()" onpointercancel="stopMove()" oncontextmenu="event.preventDefault();">▼</button>
+                <button class="d-btn btn-right" onpointerdown="startMove('R')" onpointerup="stopMove()" onpointercancel="stopMove()" oncontextmenu="event.preventDefault();">►</button>
+            </div>
+            <div style="font-size: 0.6rem; opacity: 0.5; margin-top: 10px; text-align: center;">GUEST ACCESS LEVEL: LIMITED<br>NO LID CONTROL</div>
+        </div>
+    </div>
 
-    <div id="view-console" class="view">
-        <div class="sys-header">
-            <span style="color: var(--neon-green);">DUSTU_OS</span>
-            <div>
-                <span id="admin-mqtt-status" style="color: var(--alert-red); font-size: 0.5rem; margin-right: 10px;">OFFLINE</span>
-                <button class="return-btn" onclick="switchView('view-home')">⏏ LOGOUT</button>
-            </div>
-        </div>
+    <div id="view-console" class="view">
+        <div class="sys-header">
+            <span style="color: var(--neon-green);">DUSTU_OS</span>
+            <div>
+                <span id="admin-mqtt-status" style="color: var(--alert-red); font-size: 0.5rem; margin-right: 10px;">OFFLINE</span>
+                <button class="return-btn" onclick="switchView('view-home')">⏏ LOGOUT</button>
+            </div>
+        </div>
 
-        <div class="console-main">
-            <div class="vid-container">
-                <iframe src="https://vdo.ninja/?view=dustu_cam_01&cleanoutput=1&autoplay=1" allow="autoplay; camera;"></iframe>
-                <div class="overlay-text">CAM_1: ONLINE</div>
-            </div>
+        <div class="console-main">
+            <div class="vid-container">
+                <iframe src="https://vdo.ninja/?view=dustu_cam_01&cleanoutput=1&autoplay=1" allow="autoplay; camera;"></iframe>
+                <div class="overlay-text">CAM_1: ONLINE</div>
+            </div>
 
-            <div class="admin-controls">
-                <div class="ai-dashboard">
-                    <div style="font-size: 0.6rem; color: #aaa; margin-bottom: 5px;">YOLOv8 VISION</div>
-                    <div id="ai-status" style="font-size: 1.2rem; font-weight: bold; color: yellow;">WAITING...</div>
-                </div>
+            <div class="admin-controls">
+                <div class="ai-dashboard">
+                    <div style="font-size: 0.6rem; color: #aaa; margin-bottom: 5px;">YOLOv8 VISION</div>
+                    <div id="ai-status" style="font-size: 1.2rem; font-weight: bold; color: yellow;">WAITING...</div>
+                </div>
 
-                <div class="d-pad">
-                    <button class="d-btn btn-up" onpointerdown="startMove('F')" onpointerup="stopMove()" onpointercancel="stopMove()" oncontextmenu="event.preventDefault();">W</button>
-                    <button class="d-btn btn-left" onpointerdown="startMove('L')" onpointerup="stopMove()" onpointercancel="stopMove()" oncontextmenu="event.preventDefault();">A</button>
-                    <button class="d-btn btn-down" onpointerdown="startMove('B')" onpointerup="stopMove()" onpointercancel="stopMove()" oncontextmenu="event.preventDefault();">S</button>
-                    <button class="d-btn btn-right" onpointerdown="startMove('R')" onpointerup="stopMove()" onpointercancel="stopMove()" oncontextmenu="event.preventDefault();">D</button>
-                </div>
+                <div class="d-pad">
+                    <button class="d-btn btn-up" onpointerdown="startMove('F')" onpointerup="stopMove()" onpointercancel="stopMove()" oncontextmenu="event.preventDefault();">W</button>
+                    <button class="d-btn btn-left" onpointerdown="startMove('L')" onpointerup="stopMove()" onpointercancel="stopMove()" oncontextmenu="event.preventDefault();">A</button>
+                    <button class="d-btn btn-down" onpointerdown="startMove('B')" onpointerup="stopMove()" onpointercancel="stopMove()" oncontextmenu="event.preventDefault();">S</button>
+                    <button class="d-btn btn-right" onpointerdown="startMove('R')" onpointerup="stopMove()" onpointercancel="stopMove()" oncontextmenu="event.preventDefault();">D</button>
+                </div>
 
-                <div class="actions-grid">
-                    <button class="action-btn safe" onclick="sendCommand('LID_OPEN')">OPEN LID</button>
-                    <button class="action-btn safe" onclick="sendCommand('LID_CLOSE')">CLOSE LID</button>
-                    <button class="action-btn" style="color: yellow; border-color: yellow;" onclick="sendCommand('DRY')">TEST DRY</button>
-                    <button class="action-btn" style="color: cyan; border-color: cyan;" onclick="sendCommand('WET')">TEST WET</button>
-                </div>
+                <div class="actions-grid">
+                    <button class="action-btn safe" onclick="sendCommand('LID_OPEN')">OPEN LID</button>
+                    <button class="action-btn safe" onclick="sendCommand('LID_CLOSE')">CLOSE LID</button>
+                    <button class="action-btn" style="color: yellow; border-color: yellow;" onclick="sendCommand('DRY')">TEST DRY</button>
+                    <button class="action-btn" style="color: cyan; border-color: cyan;" onclick="sendCommand('WET')">TEST WET</button>
+                </div>
 
-                <div style="margin-top: 15px; border-top: 1px solid #333; padding-top: 10px; width: 100%; text-align: center;">
-                    <div style="font-size: 0.6rem; margin-bottom: 5px;">GUEST OVERRIDE</div>
-                    <button onclick="setAccess('OPEN')" style="background: #003300; color: #0f0; border: 1px solid #0f0; padding: 8px; cursor: pointer; font-family: inherit; font-size: 0.7rem; border-radius: 4px;">UNLOCK</button>
-                    <button onclick="setAccess('LOCKED')" style="background: #330000; color: red; border: 1px solid red; padding: 8px; cursor: pointer; font-family: inherit; font-size: 0.7rem; border-radius: 4px; margin-left: 5px;">LOCK</button>
-                </div>
-            </div>
-        </div>
+                <div style="margin-top: 15px; border-top: 1px solid #333; padding-top: 10px; width: 100%; text-align: center;">
+                    <div style="font-size: 0.6rem; margin-bottom: 5px;">GUEST OVERRIDE</div>
+                    <button onclick="setAccess('OPEN')" style="background: #003300; color: #0f0; border: 1px solid #0f0; padding: 8px; cursor: pointer; font-family: inherit; font-size: 0.7rem; border-radius: 4px;">UNLOCK</button>
+                    <button onclick="setAccess('LOCKED')" style="background: #330000; color: red; border: 1px solid red; padding: 8px; cursor: pointer; font-family: inherit; font-size: 0.7rem; border-radius: 4px; margin-left: 5px;">LOCK</button>
+                </div>
+            </div>
+        </div>
 
-        <div class="terminal" id="terminal-log">
-            <div>> ROOT ACCESSED...</div>
-            <div>> WAITING FOR HARDWARE UPLINK...</div>
-        </div>
-    </div>
+        <div class="terminal" id="terminal-log">
+            <div>> ROOT ACCESSED...</div>
+            <div>> WAITING FOR HARDWARE UPLINK...</div>
+        </div>
+    </div>
 
 
-    <script>
-        let currentActiveView = 'view-home';
+    <script>
+        let currentActiveView = 'view-home';
 
-        // --- 1. SPA VIEW SWITCHER ---
-        function switchView(viewId) {
-            document.querySelectorAll('.view').forEach(v => {
-                v.classList.remove('active-block', 'active-flex', 'active-grid');
-            });
+        // --- 1. SPA VIEW SWITCHER ---
+        function switchView(viewId) {
+            document.querySelectorAll('.view').forEach(v => {
+                v.classList.remove('active-block', 'active-flex', 'active-grid');
+            });
 
-            const target = document.getElementById(viewId);
-            if (viewId === 'view-home') target.classList.add('active-block');
-            else if (viewId === 'view-live') target.classList.add('active-flex');
-            else if (viewId === 'view-console') target.classList.add('active-grid');
+            const target = document.getElementById(viewId);
+            if (viewId === 'view-home') target.classList.add('active-block');
+            else if (viewId === 'view-live') target.classList.add('active-flex');
+            else if (viewId === 'view-console') target.classList.add('active-grid');
 
-            // Force scroll to top when changing views
-            window.scrollTo(0, 0);
-            
-            // Allow scrolling on home, lock scrolling on dashboards
-            document.body.style.overflowY = (viewId === 'view-home') ? 'auto' : 'hidden';
-            document.getElementById('dino-container').style.display = (viewId === 'view-home') ? 'block' : 'none';
-            
-            currentActiveView = viewId;
-        }
+            // Force scroll to top when changing views
+            window.scrollTo(0, 0);
+            
+            // Allow scrolling on home, lock scrolling on dashboards
+            document.body.style.overflowY = (viewId === 'view-home') ? 'auto' : 'hidden';
+            document.getElementById('dino-container').style.display = (viewId === 'view-home') ? 'block' : 'none';
+            
+            currentActiveView = viewId;
+        }
 
-        // --- 2. AUTHENTICATION (Site & Admin) ---
-        function checkSitePassword() {
-            if (document.getElementById('site-password').value === "1302") {
-                document.getElementById('site-entry-modal').style.display = 'none';
-                document.body.style.overflowY = 'auto';
-                startSiteAnimations();
-            } else triggerErrorShake('#site-entry-box', 'site-error');
-        }
+        // --- 2. AUTHENTICATION (Site & Admin) ---
+        function checkSitePassword() {
+            if (document.getElementById('site-password').value === "1302") {
+                document.getElementById('site-entry-modal').style.display = 'none';
+                document.body.style.overflowY = 'auto';
+                startSiteAnimations();
+            } else triggerErrorShake('#site-entry-box', 'site-error');
+        }
 
-        function openAdminModal() {
-            document.getElementById('admin-modal').style.display = 'flex';
-            document.getElementById('admin-error').style.display = 'none';
-            document.getElementById('admin-password').value = '';
-            setTimeout(() => document.getElementById('admin-password').focus(), 50);
-        }
+        function openAdminModal() {
+            document.getElementById('admin-modal').style.display = 'flex';
+            document.getElementById('admin-error').style.display = 'none';
+            document.getElementById('admin-password').value = '';
+            setTimeout(() => document.getElementById('admin-password').focus(), 50);
+        }
 
-        function closeAdminModal() { document.getElementById('admin-modal').style.display = 'none'; }
+        function closeAdminModal() { document.getElementById('admin-modal').style.display = 'none'; }
 
-        function checkAdminPassword() {
-            if (document.getElementById('admin-password').value === "2026") {
-                closeAdminModal();
-                switchView('view-console');
-                logTerminal("SYS_ADMIN Shlok connected.");
-            } else triggerErrorShake('#admin-modal-box', 'admin-error');
-        }
+        function checkAdminPassword() {
+            if (document.getElementById('admin-password').value === "2026") {
+                closeAdminModal();
+                switchView('view-console');
+                logTerminal("SYS_ADMIN Shlok connected.");
+            } else triggerErrorShake('#admin-modal-box', 'admin-error');
+        }
 
-        function triggerErrorShake(boxId, errorId) {
-            document.getElementById(errorId).style.display = 'block';
-            anime({ targets: boxId, translateX: [0, -10, 10, -10, 10, 0], duration: 400, easing: 'easeInOutSine' });
-        }
+        function triggerErrorShake(boxId, errorId) {
+            document.getElementById(errorId).style.display = 'block';
+            anime({ targets: boxId, translateX: [0, -10, 10, -10, 10, 0], duration: 400, easing: 'easeInOutSine' });
+        }
 
-        document.getElementById('site-password').addEventListener('keypress', e => { if (e.key === 'Enter') checkSitePassword(); });
-        document.getElementById('admin-password').addEventListener('keypress', e => { if (e.key === 'Enter') checkAdminPassword(); });
+        document.getElementById('site-password').addEventListener('keypress', e => { if (e.key === 'Enter') checkSitePassword(); });
+        document.getElementById('admin-password').addEventListener('keypress', e => { if (e.key === 'Enter') checkAdminPassword(); });
 
-        // --- 3. ANIMATIONS & DINO ROASTS ---
-        function startSiteAnimations() {
-            anime.timeline({loop: false})
-            .add({ targets: '.ml15 .word', scale: [14,1], opacity: [0,1], easing: "easeOutCirc", duration: 800, delay: (el, i) => 800 * i })
-            .add({ targets: '.subtitle', translateY: [20, 0], opacity: [0, 1], duration: 600 })
-            .add({ targets: '.card', translateY: [50, 0], opacity: [0, 1], delay: anime.stagger(100), easing: 'spring(1, 80, 10, 0)' });
-        }
+        // --- 3. ANIMATIONS & DINO ROASTS ---
+        function startSiteAnimations() {
+            anime.timeline({loop: false})
+            .add({ targets: '.ml15 .word', scale: [14,1], opacity: [0,1], easing: "easeOutCirc", duration: 800, delay: (el, i) => 800 * i })
+            .add({ targets: '.subtitle', translateY: [20, 0], opacity: [0, 1], duration: 600 })
+            .add({ targets: '.card', translateY: [50, 0], opacity: [0, 1], delay: anime.stagger(100), easing: 'spring(1, 80, 10, 0)' });
+        }
 
-        const teamRoasts = {
-            'shlok': "Shlok is the kind of guy who’d sell his soul for 75% attendance and still fail.",
-            'arpit': "Arpit's future is as stable as the hostel Wi-Fi.",
-            'priyansh': "Priyansh is the reason the group project has a 'Part 2' next year.",
-            'krishna': "Krishna's code is 90% Stack Overflow, 10% prayers.",
-            'vansh': "Vansh is a specialist in doing nothing and still feeling tired.",
-            'yash': "Yash spent 4 hours picking a color. It's still gray."
-        };
+        const teamRoasts = {
+            'shlok': "Shlok is the kind of guy who’d sell his soul for 75% attendance and still fail.",
+            'arpit': "Arpit's future is as stable as the hostel Wi-Fi.",
+            'priyansh': "Priyansh is the reason the group project has a 'Part 2' next year.",
+            'krishna': "Krishna's code is 90% Stack Overflow, 10% prayers.",
+            'vansh': "Vansh is a specialist in doing nothing and still feeling tired.",
+            'yash': "Yash spent 4 hours picking a color. It's still gray."
+        };
 
-        const dino = document.getElementById('dino-container');
-        const bubble = document.getElementById('dino-text');
+        const dino = document.getElementById('dino-container');
+        const bubble = document.getElementById('dino-text');
 
-        function popUpDino(textOverride) {
-            if(currentActiveView !== 'view-home') return; 
-            bubble.innerText = textOverride || "Sorting Waste... Beep Boop.";
-            dino.style.bottom = "0px";
-            setTimeout(() => { bubble.style.display = "block"; }, 300);
-            setTimeout(() => { bubble.style.display = "none"; dino.style.bottom = "-300px"; }, 3500);
-        }
+        function popUpDino(textOverride) {
+            if(currentActiveView !== 'view-home') return; 
+            bubble.innerText = textOverride || "Sorting Waste... Beep Boop.";
+            dino.style.bottom = "0px";
+            setTimeout(() => { bubble.style.display = "block"; }, 300);
+            setTimeout(() => { bubble.style.display = "none"; dino.style.bottom = "-300px"; }, 3500);
+        }
 
-        function dinoRoast(name) { popUpDino(teamRoasts[name] || "Who is this human?"); }
-        setInterval(() => popUpDino(), 10000);
+        function dinoRoast(name) { popUpDino(teamRoasts[name] || "Who is this human?"); }
+        setInterval(() => popUpDino(), 10000);
 
-        function playNoise(name) {
-            document.querySelectorAll('audio').forEach(a => { a.pause(); a.currentTime = 0; });
-            const sound = document.getElementById('audio-' + name);
-            if (sound) {
-                sound.play().catch(e => console.log("Missing Audio:", name));
-                anime({ targets: event.target, scale: [1, 0.9, 1], duration: 200 });
-            }
-        }
+        function playNoise(name) {
+            document.querySelectorAll('audio').forEach(a => { a.pause(); a.currentTime = 0; });
+            const sound = document.getElementById('audio-' + name);
+            if (sound) {
+                sound.play().catch(e => console.log("Missing Audio:", name));
+                anime({ targets: event.target, scale: [1, 0.9, 1], duration: 200 });
+            }
+        }
 
-        // --- 4. GLOBAL MQTT ROBOT CONTROL ---
-        const mqtt_broker = 'wss://broker.emqx.io:8084/mqtt'; 
-        const topic_pub = 'dustu/control';
-        const topic_sys = 'dustu/system/access';
-        let client = mqtt.connect(mqtt_broker);
-        let driveInterval = null;
+        // --- 4. GLOBAL MQTT ROBOT CONTROL ---
+        const mqtt_broker = 'wss://broker.emqx.io:8084/mqtt'; 
+        const topic_pub = 'dustu/control';
+        const topic_sys = 'dustu/system/access';
+        let client = mqtt.connect(mqtt_broker);
+        let driveInterval = null;
 
-        client.on('connect', () => {
-            document.getElementById('admin-mqtt-status').innerText = "ONLINE";
-            document.getElementById('admin-mqtt-status').style.color = "#0f0";
-            document.getElementById("ai-status").innerText = "SYSTEM ONLINE";
-            document.getElementById("ai-status").style.color = "#0f0";
-            client.subscribe([topic_pub, topic_sys]);
-            logTerminal("Cloud MQTT connected successfully.");
-        });
+        client.on('connect', () => {
+            document.getElementById('admin-mqtt-status').innerText = "ONLINE";
+            document.getElementById('admin-mqtt-status').style.color = "#0f0";
+            document.getElementById("ai-status").innerText = "SYSTEM ONLINE";
+            document.getElementById("ai-status").style.color = "#0f0";
+            client.subscribe([topic_pub, topic_sys]);
+            logTerminal("Cloud MQTT connected successfully.");
+        });
 
-        client.on('message', (topic, message) => {
-            const msg = message.toString();
-            
-            if(topic === topic_pub || topic === topic_sys) logTerminal(`[${topic.split('/').pop().toUpperCase()}]: ${msg}`);
+        client.on('message', (topic, message) => {
+            const msg = message.toString();
+            
+            if(topic === topic_pub || topic === topic_sys) logTerminal(`[${topic.split('/').pop().toUpperCase()}]: ${msg}`);
 
-            if (topic === topic_sys) {
-                const guestDeck = document.getElementById('guest-deck');
-                const guestMsg = document.getElementById('guest-status-msg');
-                if (msg === "LOCKED") {
-                    guestDeck.classList.add("locked-controls");
-                    guestMsg.innerHTML = "⚠ ADMIN HAS CONTROL";
-                    guestMsg.classList.add("blink-red");
-                } else if (msg === "OPEN") {
-                    guestDeck.classList.remove("locked-controls");
-                    guestMsg.innerHTML = "SYSTEM: READY";
-                    guestMsg.classList.remove("blink-red");
-                }
-            }
+            if (topic === topic_sys) {
+                const guestDeck = document.getElementById('guest-deck');
+                const guestMsg = document.getElementById('guest-status-msg');
+                if (msg === "LOCKED") {
+                    guestDeck.classList.add("locked-controls");
+                    guestMsg.innerHTML = "⚠ ADMIN HAS CONTROL";
+                    guestMsg.classList.add("blink-red");
+                } else if (msg === "OPEN") {
+                    guestDeck.classList.remove("locked-controls");
+                    guestMsg.innerHTML = "SYSTEM: READY";
+                    guestMsg.classList.remove("blink-red");
+                }
+            }
 
-            if (topic === topic_pub) {
-                let aiDashboard = document.getElementById("ai-status");
-                if (msg === "DRY" || msg === "WET") {
-                    aiDashboard.innerText = msg === "DRY" ? "SORTING DRY 🧃" : "SORTING WET 🍎";
-                    aiDashboard.style.color = msg === "DRY" ? "yellow" : "cyan";
-                    setTimeout(() => { aiDashboard.innerText = "SYSTEM ONLINE"; aiDashboard.style.color = "#0f0"; }, 4000);
-                }
-            }
-        });
+            if (topic === topic_pub) {
+                let aiDashboard = document.getElementById("ai-status");
+                if (msg === "DRY" || msg === "WET") {
+                    aiDashboard.innerText = msg === "DRY" ? "SORTING DRY 🧃" : "SORTING WET 🍎";
+                    aiDashboard.style.color = msg === "DRY" ? "yellow" : "cyan";
+                    setTimeout(() => { aiDashboard.innerText = "SYSTEM ONLINE"; aiDashboard.style.color = "#0f0"; }, 4000);
+                }
+            }
+        });
 
-        // Mobile Safe Motor Control
-        function startMove(direction) {
-            if (driveInterval) return; 
-            client.publish(topic_pub, direction);
-            driveInterval = setInterval(() => client.publish(topic_pub, direction);
-              }, 200); 
-        }
+        // Mobile Safe Motor Control
+        function startMove(direction) {
+            if (driveInterval) return; 
+            client.publish(topic_pub, direction);
+            driveInterval = setInterval(() => {
+                client.publish(topic_pub, direction);
+            }, 200); 
+        }
 
-        function stopMove() {
-            if (driveInterval) {
-                clearInterval(driveInterval);
-                driveInterval = null;
-                client.publish(topic_pub, 'S');
-            }
-        }
+        function stopMove() {
+            if (driveInterval) {
+                clearInterval(driveInterval);
+                driveInterval = null;
+                client.publish(topic_pub, 'S');
+            }
+        }
 
-        function sendCommand(cmd) { client.publish(topic_pub, cmd); }
-        function setAccess(state) { client.publish(topic_sys, state, { retain: true }); }
+        function sendCommand(cmd) { client.publish(topic_pub, cmd); }
+        function setAccess(state) { client.publish(topic_sys, state, { retain: true }); }
 
-        function logTerminal(msg) {
-            const term = document.getElementById('terminal-log');
-            if(term) {
-                const newLog = document.createElement('div');
-                newLog.innerText = `> ${msg}`;
-                term.appendChild(newLog);
-                term.scrollTop = term.scrollHeight; 
-            }
-        }
+        function logTerminal(msg) {
+            const term = document.getElementById('terminal-log');
+            if(term) {
+                const newLog = document.createElement('div');
+                newLog.innerText = `> ${msg}`;
+                term.appendChild(newLog);
+                term.scrollTop = term.scrollHeight; 
+            }
+        }
 
-        // Keyboard Drive Control 
-        document.addEventListener('keydown', (e) => {
-            if(e.repeat || currentActiveView === 'view-home') return;
-            const key = e.key.toLowerCase();
-            if(key === 'w') startMove('F');
-            if(key === 's') startMove('B');
-            if(key === 'a') startMove('L');
-            if(key === 'd') startMove('R');
-        });
+        // Keyboard Drive Control 
+        document.addEventListener('keydown', (e) => {
+            if(e.repeat || currentActiveView === 'view-home') return;
+            const key = e.key.toLowerCase();
+            if(key === 'w') startMove('F');
+            if(key === 's') startMove('B');
+            if(key === 'a') startMove('L');
+            if(key === 'd') startMove('R');
+        });
 
-        document.addEventListener('keyup', (e) => {
-            if(currentActiveView === 'view-home') return;
-            if(['w','a','s','d'].includes(e.key.toLowerCase())) stopMove();
-        });
+        document.addEventListener('keyup', (e) => {
+            if(currentActiveView === 'view-home') return;
+            if(['w','a','s','d'].includes(e.key.toLowerCase())) stopMove();
+        });
 
-    </script>
-    <script>
-        // Block Right Click
-        document.addEventListener('contextmenu', event => event.preventDefault());
+    </script>
+    <script>
+        // Block Right Click
+        document.addEventListener('contextmenu', event => event.preventDefault());
 
-        // Block Keyboard Shortcuts (F12, Ctrl+U, Ctrl+Shift+I, etc.)
-        document.onkeydown = function(e) {
-            // F12
-            if(e.keyCode == 123) return false;
-            // Ctrl+Shift+I (Chrome/Edge Inspect)
-            if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false;
-            // Ctrl+Shift+J (Console)
-            if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) return false;
-            // Ctrl+U (View Source)
-            if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false;
-        }
-    </script>
+        // Block Keyboard Shortcuts (F12, Ctrl+U, Ctrl+Shift+I, etc.)
+        document.onkeydown = function(e) {
+            // F12
+            if(e.keyCode == 123) return false;
+            // Ctrl+Shift+I (Chrome/Edge Inspect)
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false;
+            // Ctrl+Shift+J (Console)
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) return false;
+            // Ctrl+U (View Source)
+            if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false;
+        }
+    </script>
 </body>
 </html>
