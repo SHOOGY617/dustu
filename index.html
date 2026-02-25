@@ -357,8 +357,12 @@
                     <button class="d-btn btn-down" onpointerdown="startMove('B')" onpointerup="stopMove()" onpointercancel="stopMove()" oncontextmenu="event.preventDefault();">S</button>
                     <button class="d-btn btn-right" onpointerdown="startMove('R')" onpointerup="stopMove()" onpointercancel="stopMove()" oncontextmenu="event.preventDefault();">D</button>
                 </div>
+                
 
                 <div class="actions-grid">
+                    <button id="voice-btn" class="action-btn" style="color: #ff00ff; border-color: #ff00ff;" onclick="startVoiceCommand()">
+    🎙️ VOICE COMMAND
+</button>
                     <button class="action-btn safe" onclick="sendCommand('LID_OPEN')">OPEN LID</button>
                     <button class="action-btn safe" onclick="sendCommand('LID_CLOSE')">CLOSE LID</button>
                     <button class="action-btn" style="color: yellow; border-color: yellow;" onclick="sendCommand('DRY')">TEST DRY</button>
@@ -567,7 +571,49 @@
             if(currentActiveView === 'view-home') return;
             if(['w','a','s','d'].includes(e.key.toLowerCase())) stopMove();
         });
+// --- 6. AI VOICE TELEMETRY (WEB SPEECH API) ---
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (SpeechRecognition) {
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.lang = 'en-US';
 
+    recognition.onstart = function() {
+        document.getElementById('voice-btn').innerText = "🔴 LISTENING...";
+        document.getElementById('voice-btn').style.background = "#ff00ff";
+        document.getElementById('voice-btn').style.color = "#000";
+    };
+
+    recognition.onresult = function(event) {
+        const command = event.results[0][0].transcript.toLowerCase();
+        logTerminal(`[MIC HEARD]: ${command}`);
+        
+        // Send the text over a new MQTT topic straight to the Python Brain!
+        client.publish('dustu/voice', command);
+    };
+
+    recognition.onspeechend = function() {
+        recognition.stop();
+        resetVoiceBtn();
+    };
+
+    recognition.onerror = function(event) {
+        logTerminal(`[MIC ERROR]: ${event.error}`);
+        resetVoiceBtn();
+    };
+
+    function startVoiceCommand() {
+        recognition.start();
+    }
+
+    function resetVoiceBtn() {
+        document.getElementById('voice-btn').innerText = "🎙️ VOICE COMMAND";
+        document.getElementById('voice-btn').style.background = "#111";
+        document.getElementById('voice-btn').style.color = "#ff00ff";
+    }
+} else {
+    logTerminal("[SYS] Voice Control not supported on this browser.");
+}
     </script>
     <script>
         // Block Right Click
