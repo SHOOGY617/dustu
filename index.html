@@ -487,16 +487,46 @@
             logTerminal("Cloud MQTT connected successfully.");
         });
 
+       // 1. Create a memory bank for the hidden voices
+        let availableVoices = [];
+        
+        // 2. Load the voices into the bank when the browser is ready
+        window.speechSynthesis.onvoiceschanged = () => {
+            availableVoices = window.speechSynthesis.getVoices();
+        };
+
         client.on('message', (topic, message) => {
             const msg = message.toString();
             
-            // --- THE MOUTH OF DUSTU ---
+            // --- THE NEW REALISTIC FEMALE MOUTH OF DUSTU ---
             if (topic === 'dustu/tts') {
                 logTerminal(`[DUSTU SAYS]: ${msg}`);
                 
                 const utterance = new SpeechSynthesisUtterance(msg);
-                utterance.pitch = 0.8; 
-                utterance.rate = 1.1;  
+                
+                // 3. Hunt for the best premium female voice on the phone
+                // We prioritize Google's Neural voices, Apple's Samantha/Siri, or anything labeled "Female"
+                let realVoice = availableVoices.find(voice => 
+                    voice.name.includes("Google UK English Female") || 
+                    voice.name.includes("Google US English") || 
+                    voice.name.includes("Samantha") ||
+                    voice.name.includes("Siri Female") ||
+                    (voice.name.includes("Female") && voice.lang.includes("en"))
+                );
+
+                // Fallback just in case it can't find the specific names above
+                if (!realVoice) {
+                    realVoice = availableVoices.find(voice => voice.name.includes("Female") || voice.name.includes("woman"));
+                }
+
+                // Attach the upgraded voice
+                if (realVoice) {
+                    utterance.voice = realVoice;
+                }
+                
+                // Smooth out the pitch and speed for a natural human sound
+                utterance.pitch = 1.05; // Slightly higher pitch for clarity
+                utterance.rate = 1.0;   // Normal speaking speed
                 
                 window.speechSynthesis.speak(utterance);
                 return; 
