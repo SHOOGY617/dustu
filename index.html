@@ -326,7 +326,7 @@
                 <button class="d-btn btn-down" onpointerdown="startMove('B')" onpointerup="stopMove()" onpointercancel="stopMove()" oncontextmenu="event.preventDefault();">▼</button>
                 <button class="d-btn btn-right" onpointerdown="startMove('R')" onpointerup="stopMove()" onpointercancel="stopMove()" oncontextmenu="event.preventDefault();">►</button>
             </div>
-            <div style="font-size: 0.6rem; opacity: 0.5; margin-top: 10px; text-align: center;">GUEST ACCESS LEVEL: LIMITED<br>NO LID CONTROL</div>
+            <div style="font-size: 0.6rem; opacity: 0.5; margin-top: 10px; text-align: center;">GUEST ACCESS LEVEL: LIMITED<br>NO ARM CONTROL</div>
         </div>
     </div>
 
@@ -358,13 +358,9 @@
                     <button class="d-btn btn-right" onpointerdown="startMove('R')" onpointerup="stopMove()" onpointercancel="stopMove()" oncontextmenu="event.preventDefault();">D</button>
                 </div>
                 
-
                 <div class="actions-grid">
-                    <button id="voice-btn" class="action-btn" style="color: #ff00ff; border-color: #ff00ff;" onclick="startVoiceCommand()">
-    🎙️ VOICE COMMAND
-</button>
-                    <button class="action-btn safe" onclick="sendCommand('LID_OPEN')">OPEN LID</button>
-                    <button class="action-btn safe" onclick="sendCommand('LID_CLOSE')">CLOSE LID</button>
+                    <button id="voice-btn" class="action-btn" style="color: #ff00ff; border-color: #ff00ff;" onclick="startVoiceCommand()">🎙️ VOICE CMD</button>
+                    <button class="action-btn safe" onclick="sendCommand('WAVE')">👋 WAVE HI</button>
                     <button class="action-btn" style="color: yellow; border-color: yellow;" onclick="sendCommand('DRY')">TEST DRY</button>
                     <button class="action-btn" style="color: cyan; border-color: cyan;" onclick="sendCommand('WET')">TEST WET</button>
                 </div>
@@ -398,10 +394,8 @@
             else if (viewId === 'view-live') target.classList.add('active-flex');
             else if (viewId === 'view-console') target.classList.add('active-grid');
 
-            // Force scroll to top when changing views
             window.scrollTo(0, 0);
             
-            // Allow scrolling on home, lock scrolling on dashboards
             document.body.style.overflowY = (viewId === 'view-home') ? 'auto' : 'hidden';
             document.getElementById('dino-container').style.display = (viewId === 'view-home') ? 'block' : 'none';
             
@@ -571,49 +565,50 @@
             if(currentActiveView === 'view-home') return;
             if(['w','a','s','d'].includes(e.key.toLowerCase())) stopMove();
         });
-// --- 6. AI VOICE TELEMETRY (WEB SPEECH API) ---
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-if (SpeechRecognition) {
-    const recognition = new SpeechRecognition();
-    recognition.continuous = false;
-    recognition.lang = 'en-US';
 
-    recognition.onstart = function() {
-        document.getElementById('voice-btn').innerText = "🔴 LISTENING...";
-        document.getElementById('voice-btn').style.background = "#ff00ff";
-        document.getElementById('voice-btn').style.color = "#000";
-    };
+        // --- 6. AI VOICE TELEMETRY (WEB SPEECH API) ---
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRecognition) {
+            const recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.lang = 'en-US';
 
-    recognition.onresult = function(event) {
-        const command = event.results[0][0].transcript.toLowerCase();
-        logTerminal(`[MIC HEARD]: ${command}`);
-        
-        // Send the text over a new MQTT topic straight to the Python Brain!
-        client.publish('dustu/voice', command);
-    };
+            recognition.onstart = function() {
+                document.getElementById('voice-btn').innerText = "🔴 LISTENING...";
+                document.getElementById('voice-btn').style.background = "#ff00ff";
+                document.getElementById('voice-btn').style.color = "#000";
+            };
 
-    recognition.onspeechend = function() {
-        recognition.stop();
-        resetVoiceBtn();
-    };
+            recognition.onresult = function(event) {
+                const command = event.results[0][0].transcript.toLowerCase();
+                logTerminal(`[MIC HEARD]: ${command}`);
+                
+                // Send the text over a new MQTT topic straight to the Python Brain!
+                client.publish('dustu/voice', command);
+            };
 
-    recognition.onerror = function(event) {
-        logTerminal(`[MIC ERROR]: ${event.error}`);
-        resetVoiceBtn();
-    };
+            recognition.onspeechend = function() {
+                recognition.stop();
+                resetVoiceBtn();
+            };
 
-    function startVoiceCommand() {
-        recognition.start();
-    }
+            recognition.onerror = function(event) {
+                logTerminal(`[MIC ERROR]: ${event.error}`);
+                resetVoiceBtn();
+            };
 
-    function resetVoiceBtn() {
-        document.getElementById('voice-btn').innerText = "🎙️ VOICE COMMAND";
-        document.getElementById('voice-btn').style.background = "#111";
-        document.getElementById('voice-btn').style.color = "#ff00ff";
-    }
-} else {
-    logTerminal("[SYS] Voice Control not supported on this browser.");
-}
+            function startVoiceCommand() {
+                recognition.start();
+            }
+
+            function resetVoiceBtn() {
+                document.getElementById('voice-btn').innerText = "🎙️ VOICE CMD";
+                document.getElementById('voice-btn').style.background = "#111";
+                document.getElementById('voice-btn').style.color = "#ff00ff";
+            }
+        } else {
+            logTerminal("[SYS] Voice Control not supported on this browser.");
+        }
     </script>
     <script>
         // Block Right Click
