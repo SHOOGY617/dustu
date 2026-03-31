@@ -353,7 +353,7 @@
                 </div>
                 
                 <div class="actions-grid">
-                    <button id="voice-btn" class="action-btn" style="color: #ff00ff; border-color: #ff00ff;" onclick="startVoiceCommand()">🎙️ VOICE CMD</button>
+                    <button id="voice-btn" class="action-btn" style="color: #ff00ff; border-color: #ff00ff;" onclick="startVoiceCommand()">🎙️ MIC OFF</button>
                     <button class="action-btn safe" onclick="sendCommand('WAVE')">👋 WAVE HI</button>
                     <button class="action-btn" style="color: yellow; border-color: yellow;" onclick="sendCommand('DRY')">TEST DRY</button>
                     <button class="action-btn" style="color: cyan; border-color: cyan;" onclick="sendCommand('WET')">TEST WET</button>
@@ -482,7 +482,6 @@
             document.getElementById("ai-status").innerText = "SYSTEM ONLINE";
             document.getElementById("ai-status").style.color = "#0f0";
             
-            // NEW: Added dustu/tts to the subscriptions!
             client.subscribe([topic_pub, topic_sys, 'dustu/tts']);
             
             logTerminal("Cloud MQTT connected successfully.");
@@ -491,20 +490,16 @@
         client.on('message', (topic, message) => {
             const msg = message.toString();
             
-            // --- NEW: THE MOUTH OF DUSTU ---
+            // --- THE MOUTH OF DUSTU ---
             if (topic === 'dustu/tts') {
                 logTerminal(`[DUSTU SAYS]: ${msg}`);
                 
-                // Create the speech object
                 const utterance = new SpeechSynthesisUtterance(msg);
-                
-                // Make him sound a little robotic
                 utterance.pitch = 0.8; 
                 utterance.rate = 1.1;  
                 
-                // Speak out of the phone speakers
                 window.speechSynthesis.speak(utterance);
-                return; // Stop processing so it doesn't trigger UI updates below
+                return; 
             }
             
             if(topic === topic_pub || topic === topic_sys) logTerminal(`[${topic.split('/').pop().toUpperCase()}]: ${msg}`);
@@ -583,9 +578,9 @@
         if (SpeechRecognition) {
             const recognition = new SpeechRecognition();
             
-            // CRITICAL: Set to true so it never stops listening
+            // Continuous listening enabled
             recognition.continuous = true; 
-            recognition.interimResults = false; // Only get final sentences
+            recognition.interimResults = false;
             recognition.lang = 'en-US';
 
             let isListening = false;
@@ -598,24 +593,28 @@
             };
 
             recognition.onresult = function(event) {
-                // Get the most recent thing the microphone heard
                 const lastResultIndex = event.results.length - 1;
-                const command = event.results[lastResultIndex][0].transcript.toLowerCase().trim();
+                let command = event.results[lastResultIndex][0].transcript.toLowerCase().trim();
                 
                 logTerminal(`[HEARD]: ${command}`);
                 
-                // --- THE WAKE WORD FILTER ---
-                // Only send to MQTT if the phrase contains "dustu"
-                if (command.includes("dustu")) {
-                    
-                    // Optional: Remove the wake word from the string before sending
-                    let cleanCommand = command.replace("hey dustu", "").replace("dustu", "").trim();
+                // --- THE FUZZY WAKE WORD DICTIONARY ---
+                const wakeWords = ["dustu", "dust to", "dust do", "das to", "just do", "does to", "robot"];
+                
+                // Find if the transcript contains ANY of the variations
+                let foundWakeWord = wakeWords.find(word => command.includes(word));
+
+                if (foundWakeWord) {
+                    // Remove "hey [wakeword]" or just "[wakeword]"
+                    let cleanCommand = command.replace("hey " + foundWakeWord, "")
+                                              .replace(foundWakeWord, "")
+                                              .trim();
                     
                     if (cleanCommand.length > 0) {
                         logTerminal(`[ACCEPTED]: ${cleanCommand}`);
                         client.publish('dustu/voice', cleanCommand);
                     } else {
-                        // If they just said "Dustu" and nothing else
+                        // They just said the wake word and stopped speaking
                         const utterance = new SpeechSynthesisUtterance("What do you want?");
                         utterance.pitch = 0.8; utterance.rate = 1.1;
                         window.speechSynthesis.speak(utterance);
@@ -623,10 +622,9 @@
                 }
             };
 
-            // If the mic accidentally stops (due to browser limits), restart it automatically
             recognition.onend = function() {
                 if (isListening) {
-                    recognition.start();
+                    recognition.start(); // Auto-restart if browser pauses it
                 } else {
                     resetVoiceBtn();
                 }
@@ -638,7 +636,6 @@
                 }
             };
 
-            // We change the button to be a Toggle (Turn Mic On / Turn Mic Off)
             function startVoiceCommand() {
                 if (!isListening) {
                     recognition.start();
@@ -655,6 +652,18 @@
             }
         } else {
             logTerminal("[SYS] Voice Control not supported on this browser.");
+        }
+    </script>
+    <script>
+        // Block Right Click
+        document.addEventListener('contextmenu', event => event.preventDefault());
+
+        // Block Keyboard Shortcuts
+        document.onkeydown = function(e) {
+            if(e.keyCode == 123) return false;
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false;
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) return false;
+            if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false;
         }
     </script>
 </body>
