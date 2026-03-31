@@ -578,59 +578,83 @@
             if(['w','a','s','d'].includes(e.key.toLowerCase())) stopMove();
         });
 
-        // --- 6. AI VOICE TELEMETRY (WEB SPEECH API) ---
+        // --- 6. AI VOICE TELEMETRY (WAKE WORD EDITION) ---
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (SpeechRecognition) {
             const recognition = new SpeechRecognition();
-            recognition.continuous = false;
+            
+            // CRITICAL: Set to true so it never stops listening
+            recognition.continuous = true; 
+            recognition.interimResults = false; // Only get final sentences
             recognition.lang = 'en-US';
 
+            let isListening = false;
+
             recognition.onstart = function() {
-                document.getElementById('voice-btn').innerText = "🔴 LISTENING...";
-                document.getElementById('voice-btn').style.background = "#ff00ff";
+                isListening = true;
+                document.getElementById('voice-btn').innerText = "🟢 MIC HOT";
+                document.getElementById('voice-btn').style.background = "#00ff00";
                 document.getElementById('voice-btn').style.color = "#000";
             };
 
             recognition.onresult = function(event) {
-                const command = event.results[0][0].transcript.toLowerCase();
-                logTerminal(`[MIC HEARD]: ${command}`);
+                // Get the most recent thing the microphone heard
+                const lastResultIndex = event.results.length - 1;
+                const command = event.results[lastResultIndex][0].transcript.toLowerCase().trim();
                 
-                client.publish('dustu/voice', command);
+                logTerminal(`[HEARD]: ${command}`);
+                
+                // --- THE WAKE WORD FILTER ---
+                // Only send to MQTT if the phrase contains "dustu"
+                if (command.includes("dustu")) {
+                    
+                    // Optional: Remove the wake word from the string before sending
+                    let cleanCommand = command.replace("hey dustu", "").replace("dustu", "").trim();
+                    
+                    if (cleanCommand.length > 0) {
+                        logTerminal(`[ACCEPTED]: ${cleanCommand}`);
+                        client.publish('dustu/voice', cleanCommand);
+                    } else {
+                        // If they just said "Dustu" and nothing else
+                        const utterance = new SpeechSynthesisUtterance("What do you want?");
+                        utterance.pitch = 0.8; utterance.rate = 1.1;
+                        window.speechSynthesis.speak(utterance);
+                    }
+                }
             };
 
-            recognition.onspeechend = function() {
-                recognition.stop();
-                resetVoiceBtn();
+            // If the mic accidentally stops (due to browser limits), restart it automatically
+            recognition.onend = function() {
+                if (isListening) {
+                    recognition.start();
+                } else {
+                    resetVoiceBtn();
+                }
             };
 
             recognition.onerror = function(event) {
-                logTerminal(`[MIC ERROR]: ${event.error}`);
-                resetVoiceBtn();
+                if(event.error !== 'no-speech') {
+                    logTerminal(`[MIC ERROR]: ${event.error}`);
+                }
             };
 
+            // We change the button to be a Toggle (Turn Mic On / Turn Mic Off)
             function startVoiceCommand() {
-                recognition.start();
+                if (!isListening) {
+                    recognition.start();
+                } else {
+                    isListening = false;
+                    recognition.stop();
+                }
             }
 
             function resetVoiceBtn() {
-                document.getElementById('voice-btn').innerText = "🎙️ VOICE CMD";
+                document.getElementById('voice-btn').innerText = "🎙️ MIC OFF";
                 document.getElementById('voice-btn').style.background = "#111";
                 document.getElementById('voice-btn').style.color = "#ff00ff";
             }
         } else {
             logTerminal("[SYS] Voice Control not supported on this browser.");
-        }
-    </script>
-    <script>
-        // Block Right Click
-        document.addEventListener('contextmenu', event => event.preventDefault());
-
-        // Block Keyboard Shortcuts
-        document.onkeydown = function(e) {
-            if(e.keyCode == 123) return false;
-            if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false;
-            if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) return false;
-            if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false;
         }
     </script>
 </body>
