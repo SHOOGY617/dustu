@@ -129,8 +129,6 @@
         .d-btn { 
             background: #111; border: 2px solid var(--secondary); color: var(--secondary); 
             font-size: 24px; cursor: pointer; border-radius: 12px; 
-            
-            /* CRITICAL FOR MOBILE: Stops double-tap zoom, scrolling, and text highlighting */
             touch-action: none; 
             user-select: none;
             -webkit-user-select: none;
@@ -167,14 +165,10 @@
         @media (max-width: 768px) {
             h1 { font-size: 2.2rem; }
             .sys-header span { font-size: 0.6rem; }
-            
-            /* Admin Console Stacks vertically on phone */
             #view-console { grid-template-rows: 50px 1fr; } 
             .console-main { grid-template-columns: 1fr; grid-template-rows: 35vh 1fr; }
             .admin-controls { border-left: none; border-top: 2px solid #333; padding-bottom: 20px;}
-            
             .terminal { display: none; } 
-            
             .d-pad { gap: 10px; margin: 10px auto;}
             .d-btn { font-size: 20px; }
         }
@@ -379,7 +373,6 @@
         </div>
     </div>
 
-
     <script>
         let currentActiveView = 'view-home';
 
@@ -488,12 +481,31 @@
             document.getElementById('admin-mqtt-status').style.color = "#0f0";
             document.getElementById("ai-status").innerText = "SYSTEM ONLINE";
             document.getElementById("ai-status").style.color = "#0f0";
-            client.subscribe([topic_pub, topic_sys]);
+            
+            // NEW: Added dustu/tts to the subscriptions!
+            client.subscribe([topic_pub, topic_sys, 'dustu/tts']);
+            
             logTerminal("Cloud MQTT connected successfully.");
         });
 
         client.on('message', (topic, message) => {
             const msg = message.toString();
+            
+            // --- NEW: THE MOUTH OF DUSTU ---
+            if (topic === 'dustu/tts') {
+                logTerminal(`[DUSTU SAYS]: ${msg}`);
+                
+                // Create the speech object
+                const utterance = new SpeechSynthesisUtterance(msg);
+                
+                // Make him sound a little robotic
+                utterance.pitch = 0.8; 
+                utterance.rate = 1.1;  
+                
+                // Speak out of the phone speakers
+                window.speechSynthesis.speak(utterance);
+                return; // Stop processing so it doesn't trigger UI updates below
+            }
             
             if(topic === topic_pub || topic === topic_sys) logTerminal(`[${topic.split('/').pop().toUpperCase()}]: ${msg}`);
 
@@ -583,7 +595,6 @@
                 const command = event.results[0][0].transcript.toLowerCase();
                 logTerminal(`[MIC HEARD]: ${command}`);
                 
-                // Send the text over a new MQTT topic straight to the Python Brain!
                 client.publish('dustu/voice', command);
             };
 
@@ -614,15 +625,11 @@
         // Block Right Click
         document.addEventListener('contextmenu', event => event.preventDefault());
 
-        // Block Keyboard Shortcuts (F12, Ctrl+U, Ctrl+Shift+I, etc.)
+        // Block Keyboard Shortcuts
         document.onkeydown = function(e) {
-            // F12
             if(e.keyCode == 123) return false;
-            // Ctrl+Shift+I (Chrome/Edge Inspect)
             if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false;
-            // Ctrl+Shift+J (Console)
             if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) return false;
-            // Ctrl+U (View Source)
             if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false;
         }
     </script>
