@@ -599,7 +599,9 @@
                 logTerminal(`[HEARD]: ${command}`);
                 
                 // --- THE FUZZY WAKE WORD DICTIONARY ---
-                const wakeWords = ["dustu", "dust to", "dust do", "das to", "just do", "does to", "robot"];
+                const wakeWords = ["dustu", "dust to", "dust do", "das to", "just do", "does to", 
+                    "robot", "dastu", "dosto", "dusto", "dusty", "dash to", "dash two",
+                    "dust too", "dust 2"];
                 
                 // Find if the transcript contains ANY of the variations
                 let foundWakeWord = wakeWords.find(word => command.includes(word));
