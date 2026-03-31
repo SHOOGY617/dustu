@@ -599,9 +599,13 @@
                 logTerminal(`[HEARD]: ${command}`);
                 
                 // --- THE FUZZY WAKE WORD DICTIONARY ---
-                const wakeWords = ["dustu", "dust to", "dust do", "das to", "just do", "does to", 
-                    "robot", "dastu", "dosto", "dusto", "dusty", "dash to", "dash two",
-                    "dust too", "dust 2"];
+                const wakeWords = ["dust too", "dust two", "dash two", "just too", "just two", "does two", "test two",
+                    "dust to", "dust do", "dust eu", "dust ew", "dust oo", "dust you", "dust u",
+                    "das too", "das two", "dash to", "dash do", "just do", "just to", "does to", "does do",
+                    "test to", "test do", "thus to", "thus do", "the store", "to store", "desktop",
+                    "hey robot", "dustbin", "duster", "the stew", "just you",
+                    "dustu", "dastu", "dosto", "dusto", "destu", "dusty", "dasto",
+                    "robot", "system", "ai"];
                 
                 // Find if the transcript contains ANY of the variations
                 let foundWakeWord = wakeWords.find(word => command.includes(word));
