@@ -153,7 +153,11 @@
         .admin-controls { background: #0a0a0a; border-left: 1px solid #333; padding: 10px; display: flex; flex-direction: column; align-items: center; overflow-y: auto;}
         
         .ai-dashboard { width: 100%; text-align: center; border: 1px dashed var(--secondary); padding: 10px 0; background: #001100; margin-bottom: 10px; box-sizing: border-box;}
+        
+        /* UPDATED GRID FOR NEW BUTTON */
         .actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; margin-top: 10px; }
+        .actions-grid.three-col { grid-template-columns: 1fr 1fr 1fr; } /* Added for layout flexibility */
+        
         .action-btn { padding: 12px 5px; background: #111; border: 1px solid var(--alert-red); color: var(--alert-red); cursor: pointer; font-weight: bold; font-family: 'Courier New'; font-size: 0.7rem; border-radius: 5px; touch-action: manipulation;}
         .action-btn:active { background: var(--alert-red); color: #000; }
         .action-btn.safe { border-color: cyan; color: cyan; }
@@ -352,6 +356,10 @@
                     <button class="d-btn btn-right" onpointerdown="startMove('R')" onpointerup="stopMove()" onpointercancel="stopMove()" oncontextmenu="event.preventDefault();">D</button>
                 </div>
                 
+                <div style="width: 100%; margin-top: 10px;">
+                    <button id="direct-talk-btn" class="action-btn" style="width: 100%; color: #ff8906; border-color: #ff8906; padding: 15px 5px;" onclick="directTalkCommand()">🗣️ DIRECT COMMAND</button>
+                </div>
+
                 <div class="actions-grid">
                     <button id="voice-btn" class="action-btn" style="color: #ff00ff; border-color: #ff00ff;" onclick="startVoiceCommand()">🎙️ MIC OFF</button>
                     <button class="action-btn safe" onclick="sendCommand('WAVE')">👋 WAVE HI</button>
@@ -505,7 +513,6 @@
                 const utterance = new SpeechSynthesisUtterance(msg);
                 
                 // 3. Hunt for the best premium female voice on the phone
-                // We prioritize Google's Neural voices, Apple's Samantha/Siri, or anything labeled "Female"
                 let realVoice = availableVoices.find(voice => 
                     voice.name.includes("Google UK English Female") || 
                     voice.name.includes("Google US English") || 
@@ -514,19 +521,16 @@
                     (voice.name.includes("Female") && voice.lang.includes("en"))
                 );
 
-                // Fallback just in case it can't find the specific names above
                 if (!realVoice) {
                     realVoice = availableVoices.find(voice => voice.name.includes("Female") || voice.name.includes("woman"));
                 }
 
-                // Attach the upgraded voice
                 if (realVoice) {
                     utterance.voice = realVoice;
                 }
                 
-                // Smooth out the pitch and speed for a natural human sound
-                utterance.pitch = 1.05; // Slightly higher pitch for clarity
-                utterance.rate = 1.0;   // Normal speaking speed
+                utterance.pitch = 1.05; 
+                utterance.rate = 1.0;   
                 
                 window.speechSynthesis.speak(utterance);
                 return; 
@@ -603,23 +607,27 @@
             if(['w','a','s','d'].includes(e.key.toLowerCase())) stopMove();
         });
 
-        // --- 6. AI VOICE TELEMETRY (WAKE WORD EDITION) ---
+        // --- 6. AI VOICE TELEMETRY (WAKE WORD & DIRECT BYPASS) ---
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let isListening = false;
+        let skipWakeWord = false; // NEW STATE FLAG FOR THE BYPASS
+
         if (SpeechRecognition) {
             const recognition = new SpeechRecognition();
             
-            // Continuous listening enabled
             recognition.continuous = true; 
             recognition.interimResults = false;
             recognition.lang = 'en-IN';
 
-            let isListening = false;
-
             recognition.onstart = function() {
                 isListening = true;
-                document.getElementById('voice-btn').innerText = "🟢 MIC HOT";
-                document.getElementById('voice-btn').style.background = "#00ff00";
-                document.getElementById('voice-btn').style.color = "#000";
+                
+                // Only update the main Mic button if we aren't using the Direct Talk bypass
+                if (!skipWakeWord) {
+                    document.getElementById('voice-btn').innerText = "🟢 MIC HOT";
+                    document.getElementById('voice-btn').style.background = "#00ff00";
+                    document.getElementById('voice-btn').style.color = "#000";
+                }
             };
 
             recognition.onresult = function(event) {
@@ -628,6 +636,14 @@
                 
                 logTerminal(`[HEARD]: ${command}`);
                 
+                // --- NEW: THE WAKE-WORD BYPASS (DIRECT TALK) ---
+                if (skipWakeWord) {
+                    logTerminal(`[DIRECT ACCEPTED]: ${command}`);
+                    client.publish('dustu/voice', command);
+                    resetDirectTalkBtn();
+                    return; // EXIT FUNCTION IMMEDIATELY! DO NOT CHECK WAKE WORDS.
+                }
+
                 // --- THE FUZZY WAKE WORD DICTIONARY ---
                 const wakeWords = ["dust too", "dust two", "dash two", "just too", "just two", "does two", "test two",
                     "dust to", "dust do", "dust eu", "dust ew", "dust oo", "dust you", "dust u",
@@ -637,11 +653,9 @@
                     "dustu", "dastu", "dosto", "dusto", "destu", "dusty", "dasto",
                     "robot", "system", "ai", "vastu", "that's true", "dustin", "robert", "dasu payo", "dastoor", "plus 2"];
                 
-                // Find if the transcript contains ANY of the variations
                 let foundWakeWord = wakeWords.find(word => command.includes(word));
 
                 if (foundWakeWord) {
-                    // Remove "hey [wakeword]" or just "[wakeword]"
                     let cleanCommand = command.replace("hey " + foundWakeWord, "")
                                               .replace(foundWakeWord, "")
                                               .trim();
@@ -650,7 +664,6 @@
                         logTerminal(`[ACCEPTED]: ${cleanCommand}`);
                         client.publish('dustu/voice', cleanCommand);
                     } else {
-                        // They just said the wake word and stopped speaking
                         const utterance = new SpeechSynthesisUtterance("What do you want?");
                         utterance.pitch = 0.8; utterance.rate = 1.1;
                         window.speechSynthesis.speak(utterance);
@@ -663,6 +676,7 @@
                     recognition.start(); // Auto-restart if browser pauses it
                 } else {
                     resetVoiceBtn();
+                    resetDirectTalkBtn();
                 }
             };
 
@@ -672,7 +686,8 @@
                 }
             };
 
-            function startVoiceCommand() {
+            // This function controls the normal "Always Listening" Mic button
+            window.startVoiceCommand = function() {
                 if (!isListening) {
                     recognition.start();
                 } else {
@@ -681,13 +696,44 @@
                 }
             }
 
+            // --- NEW: THE DIRECT TALK CONTROLLER ---
+            window.directTalkCommand = function() {
+                if (skipWakeWord) {
+                    // Cancel it if they click it again
+                    resetDirectTalkBtn();
+                } else {
+                    // Activate Direct mode
+                    skipWakeWord = true;
+                    document.getElementById('direct-talk-btn').innerText = "👂 LISTENING FOR COMMAND...";
+                    document.getElementById('direct-talk-btn').style.background = "#ff8906";
+                    document.getElementById('direct-talk-btn').style.color = "#000";
+
+                    // Ensure the mic is actually running
+                    if (!isListening) {
+                        recognition.start();
+                    }
+                }
+            }
+
             function resetVoiceBtn() {
                 document.getElementById('voice-btn').innerText = "🎙️ MIC OFF";
                 document.getElementById('voice-btn').style.background = "#111";
                 document.getElementById('voice-btn').style.color = "#ff00ff";
             }
+            
+            function resetDirectTalkBtn() {
+                skipWakeWord = false;
+                const dtBtn = document.getElementById('direct-talk-btn');
+                if(dtBtn) {
+                    dtBtn.innerText = "🗣️ DIRECT COMMAND";
+                    dtBtn.style.background = "#111";
+                    dtBtn.style.color = "#ff8906";
+                }
+            }
+            
         } else {
             logTerminal("[SYS] Voice Control not supported on this browser.");
+            window.directTalkCommand = function() { alert("Voice not supported on this browser/device."); }
         }
     </script>
     <script>
