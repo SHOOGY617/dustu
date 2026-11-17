@@ -116,6 +116,8 @@
         }
         .return-btn { background: none; border: 1px solid var(--highlight); color: var(--highlight); padding: 5px 8px; cursor: pointer; font-family: inherit; font-size: 0.6rem;}
         .return-btn:hover { background: var(--highlight); color: var(--card); }
+        .cam-btn { background: #151520; color: #ff8906; border: 1px solid #ff8906; padding: 5px 10px; cursor: pointer; font-family: inherit; font-size: 0.6rem; border-radius: 4px; transition: all 0.2s; }
+        .cam-btn:hover { background: #ff8906; color: #000; }
         
         .vid-container { border: 2px solid #333; background: #000; position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; }
         .vid-container iframe { width: 100%; height: 100%; border: none; object-fit: cover; }
@@ -205,6 +207,78 @@
         </div>
     </div>
 
+    <!-- PHONE CAMERA CUSTOMIZER MODAL -->
+    <div id="cam-modal" class="modal-overlay">
+        <div class="modal-box" id="cam-modal-box" style="max-width: 500px; width: 90%; text-align: left; padding: 25px 20px; max-height: 90vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 8px; margin-bottom: 12px;">
+                <h3 style="margin: 0; color: #ff8906; font-size: 0.95rem;">📱 PHONE CAM CONFIG</h3>
+                <button onclick="closeCamModal()" style="background: none; border: none; color: #aaa; font-size: 1.2rem; cursor: pointer;">✕</button>
+            </div>
+            
+            <p style="font-size: 0.75rem; color: #aaa; margin-bottom: 14px;">
+                Customize phone camera broadcast stream (rear/front lens, resolution, flash, zoom) for OBS & YOLO:
+            </p>
+
+            <div style="margin-bottom: 12px;">
+                <label style="font-size: 0.65rem; color: var(--secondary); font-weight: bold; display: block; margin-bottom: 4px;">STREAM ID (ROOM):</label>
+                <input type="text" id="cfg-stream-id" value="dustu_live_bot" style="width: 100%; box-sizing: border-box; padding: 10px; font-size: 0.85rem; background: #0c0c14; border: 1px solid #444; color: #00ffcc; border-radius: 6px; font-family: monospace; text-align: left;" oninput="updateGeneratedUrls()">
+            </div>
+
+            <div style="margin-bottom: 12px;">
+                <label style="font-size: 0.65rem; color: var(--secondary); font-weight: bold; display: block; margin-bottom: 4px;">PHONE CAMERA LENS:</label>
+                <select id="cfg-camera-facing" style="width: 100%; padding: 10px; font-size: 0.8rem; background: #0c0c14; border: 1px solid #444; color: #fff; border-radius: 6px;" onchange="updateGeneratedUrls()">
+                    <option value="back" selected>📷 Rear / Environment Camera (Recommended for Robot)</option>
+                    <option value="user">🤳 Front / Selfie Camera</option>
+                    <option value="select">⚙️ Interactive Lens Selector on Phone</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom: 12px;">
+                <label style="font-size: 0.65rem; color: var(--secondary); font-weight: bold; display: block; margin-bottom: 4px;">VIDEO QUALITY & LATENCY:</label>
+                <select id="cfg-quality-preset" style="width: 100%; padding: 10px; font-size: 0.8rem; background: #0c0c14; border: 1px solid #444; color: #fff; border-radius: 6px;" onchange="updateGeneratedUrls()">
+                    <option value="balanced" selected>🎯 720p HD @ 30 FPS (1500 kbps - Recommended)</option>
+                    <option value="fast">⚡ 480p High-Speed (Ultra-Low Latency for AI - 800 kbps)</option>
+                    <option value="ultra">💎 1080p Full HD (Crisp Details - 3000 kbps)</option>
+                </select>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; font-size: 0.72rem; color: #ddd;">
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                    <input type="checkbox" id="cfg-torch" checked onchange="updateGeneratedUrls()"> 🔦 Flashlight/Torch
+                </label>
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                    <input type="checkbox" id="cfg-zoom" checked onchange="updateGeneratedUrls()"> 🔍 Zoom Controls
+                </label>
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                    <input type="checkbox" id="cfg-mute" checked onchange="updateGeneratedUrls()"> 🔇 Mute Mic (Save Data)
+                </label>
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                    <input type="checkbox" id="cfg-clean" onchange="updateGeneratedUrls()"> 📱 Clean Phone UI
+                </label>
+            </div>
+
+            <div style="background: #000; border: 1px solid #333; padding: 10px; border-radius: 6px; margin-bottom: 12px;">
+                <div style="font-size: 0.6rem; color: #888; margin-bottom: 4px;">CUSTOM PHONE BROADCAST LINK:</div>
+                <input type="text" id="cfg-result-url" readonly style="width: 100%; box-sizing: border-box; font-size: 0.68rem; background: #050505; color: #00ffcc; border: 1px solid #222; padding: 6px; border-radius: 4px; font-family: monospace;" onclick="this.select()">
+                <div style="display: flex; gap: 6px; margin-top: 8px;">
+                    <button type="button" id="copy-btn" class="audio-btn" style="flex: 1; padding: 6px; font-size: 0.55rem;" onclick="copyPhoneUrl()">📋 COPY URL</button>
+                    <button type="button" class="audio-btn" style="background: #2cb67d; flex: 1; padding: 6px; font-size: 0.55rem;" onclick="openBroadcastNow()">🚀 OPEN NOW</button>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-bottom: 12px; background: rgba(255,255,255,0.03); padding: 10px; border-radius: 8px;">
+                <div style="font-size: 0.65rem; color: #ff8906; margin-bottom: 6px;">📲 SCAN WITH PHONE CAMERA TO STREAM:</div>
+                <img id="cfg-qr-code" src="" alt="QR Code" style="width: 130px; height: 130px; border: 2px solid #ff8906; border-radius: 8px; background: #fff; padding: 4px; display: inline-block;">
+                <div style="font-size: 0.6rem; color: #aaa; margin-top: 4px;">Open phone camera -> point at QR -> tap notification</div>
+            </div>
+
+            <div class="modal-btn-group" style="margin-top: 5px; gap: 8px;">
+                <button class="audio-btn" style="background: #ff8906; color: #000; flex: 1;" onclick="applyStreamSettings()">APPLY TO ROBOT VIEWER</button>
+                <button class="audio-btn" style="background: #333; color: #fff; box-shadow: none;" onclick="closeCamModal()">CLOSE</button>
+            </div>
+        </div>
+    </div>
+
     <div id="dino-container">
         <div class="speech-bubble" id="dino-text">SORTING TRASH... BEEP BOOP</div>
         <img id="dino-img" src="dino.png" alt="Funny Dino">
@@ -229,6 +303,7 @@
                         padding: 12px 20px; font-family: 'Press Start 2P', cursive; font-size: 0.7rem;
                         margin-top: 15px; background: rgba(44, 182, 125, 0.1); cursor: pointer; border-radius: 8px;
                     ">🔴 GUEST PILOT MODE</button>
+                    <button onclick="openCamModal()" class="cam-btn" style="display: block; margin: 10px auto 0 auto; padding: 8px 16px;">📱 PHONE CAM CONFIG</button>
                     <p style="margin-top: 20px; font-size: 0.9rem;">A semi-autonomous robot that eats trash, sorts it using YOLOv8 AI, and sometimes questions its own existence.</p>
                 </div>
             </header>
@@ -279,11 +354,14 @@
     <div id="view-live" class="view">
         <div class="sys-header">
             <span style="color: var(--secondary);">DUSTU // GUEST</span>
-            <button class="return-btn" onclick="switchView('view-home')">⏏ DISCONNECT</button>
+            <div>
+                <button class="cam-btn" onclick="openCamModal()" style="margin-right: 8px;">📱 CAM CONFIG</button>
+                <button class="return-btn" onclick="switchView('view-home')">⏏ DISCONNECT</button>
+            </div>
         </div>
         
         <div class="vid-container">
-            <iframe src="https://vdo.ninja/?view=dustu_live_bot&cleanoutput=1&autoplay=1&quality=30&bitrate=500&buffer=0" allow="autoplay; camera;"></iframe>
+            <iframe id="guest-stream-frame" src="https://vdo.ninja/?view=dustu_live_bot&cleanoutput=1&autoplay=1&quality=30&bitrate=500&buffer=0" allow="autoplay; camera;"></iframe>
             <div class="overlay-text">GUEST_CAM_FEED</div>
         </div>
 
@@ -303,6 +381,7 @@
         <div class="sys-header">
             <span style="color: var(--neon-green);">DUSTU_OS</span>
             <div>
+                <button class="cam-btn" onclick="openCamModal()" style="margin-right: 8px;">📱 CAM CONFIG</button>
                 <span id="admin-mqtt-status" style="color: var(--alert-red); font-size: 0.5rem; margin-right: 10px;">OFFLINE</span>
                 <button class="return-btn" onclick="switchView('view-home')">⏏ LOGOUT</button>
             </div>
@@ -310,7 +389,7 @@
 
         <div class="console-main">
             <div class="vid-container">
-                <iframe src="https://vdo.ninja/?view=dustu_live_bot&cleanoutput=1&autoplay=1" allow="autoplay; camera;"></iframe>
+                <iframe id="admin-stream-frame" src="https://vdo.ninja/?view=dustu_live_bot&cleanoutput=1&autoplay=1" allow="autoplay; camera;"></iframe>
                 <div class="overlay-text">CAM_1: ONLINE</div>
             </div>
 
@@ -400,6 +479,100 @@
             } else triggerErrorShake('#admin-modal-box', 'admin-error');
         }
 
+        // --- 2.1 PHONE CAMERA CUSTOMIZER ---
+        function openCamModal() {
+            const savedStreamId = localStorage.getItem('dustu_stream_id') || 'dustu_live_bot';
+            const streamInput = document.getElementById('cfg-stream-id');
+            if (streamInput && (!streamInput.value || streamInput.value === 'dustu_live_bot')) {
+                streamInput.value = savedStreamId;
+            }
+            document.getElementById('cam-modal').style.display = 'flex';
+            updateGeneratedUrls();
+        }
+
+        function closeCamModal() {
+            document.getElementById('cam-modal').style.display = 'none';
+        }
+
+        function updateGeneratedUrls() {
+            let streamId = (document.getElementById('cfg-stream-id').value || 'dustu_live_bot').trim();
+            let facing = document.getElementById('cfg-camera-facing').value;
+            let preset = document.getElementById('cfg-quality-preset').value;
+            let torch = document.getElementById('cfg-torch').checked;
+            let zoom = document.getElementById('cfg-zoom').checked;
+            let mute = document.getElementById('cfg-mute').checked;
+            let clean = document.getElementById('cfg-clean').checked;
+
+            let params = [];
+            params.push(`push=${encodeURIComponent(streamId)}`);
+            params.push('autostart=1');
+
+            if (facing === 'back') {
+                params.push('facing=back');
+            } else if (facing === 'user') {
+                params.push('facing=user');
+            } else if (facing === 'select') {
+                params.push('webcam=1');
+            }
+
+            if (preset === 'fast') {
+                params.push('quality=2&scale=480&maxframerate=30&bitrate=800');
+            } else if (preset === 'balanced') {
+                params.push('quality=1&scale=720&maxframerate=30&bitrate=1500');
+            } else if (preset === 'ultra') {
+                params.push('quality=0&scale=1080&maxframerate=30&bitrate=3000');
+            }
+
+            if (torch) params.push('torch=1');
+            if (zoom) params.push('zoom=1');
+            if (mute) params.push('audio=0');
+            if (clean) params.push('cleanoutput=1');
+
+            let phoneUrl = `https://vdo.ninja/?${params.join('&')}`;
+            let viewUrl = `https://vdo.ninja/?view=${encodeURIComponent(streamId)}&cleanoutput=1&autoplay=1`;
+
+            let resultInput = document.getElementById('cfg-result-url');
+            if (resultInput) resultInput.value = phoneUrl;
+
+            let qrImg = document.getElementById('cfg-qr-code');
+            if (qrImg) qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(phoneUrl)}`;
+
+            return { phoneUrl, viewUrl, streamId };
+        }
+
+        function copyPhoneUrl() {
+            let input = document.getElementById('cfg-result-url');
+            input.select();
+            input.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(input.value).then(() => {
+                let btn = document.getElementById('copy-btn');
+                let old = btn.innerText;
+                btn.innerText = "✅ COPIED!";
+                setTimeout(() => { btn.innerText = old; }, 2000);
+            }).catch(() => {
+                alert("URL: " + input.value);
+            });
+        }
+
+        function openBroadcastNow() {
+            let { phoneUrl } = updateGeneratedUrls();
+            window.open(phoneUrl, '_blank');
+        }
+
+        function applyStreamSettings() {
+            let { viewUrl, streamId } = updateGeneratedUrls();
+            localStorage.setItem('dustu_stream_id', streamId);
+
+            let guestFrame = document.getElementById('guest-stream-frame');
+            let adminFrame = document.getElementById('admin-stream-frame');
+            if (guestFrame) guestFrame.src = viewUrl + '&quality=30&bitrate=500&buffer=0';
+            if (adminFrame) adminFrame.src = viewUrl;
+
+            closeCamModal();
+            logTerminal(`[SYS] Camera stream updated to: ${streamId}`);
+            alert(`Stream linked to ID: ${streamId}\nPhone broadcast and viewers are now synced!`);
+        }
+
         function triggerErrorShake(boxId, errorId) {
             document.getElementById(errorId).style.display = 'block';
             anime({ targets: boxId, translateX: [0, -10, 10, -10, 10, 0], duration: 400, easing: 'easeInOutSine' });
@@ -452,7 +625,7 @@
             document.getElementById("ai-status").innerText = "SYSTEM ONLINE";
             document.getElementById("ai-status").style.color = "#0f0";
             
-            client.subscribe([topic_pub, topic_sys, 'dustu/tts']);
+            client.subscribe([topic_pub, topic_sys, 'dustu/tts', 'dustu/telemetry']);
             
             logTerminal("Cloud MQTT connected successfully.");
         });
@@ -516,10 +689,32 @@
 
             if (topic === topic_pub) {
                 let aiDashboard = document.getElementById("ai-status");
-                if (msg === "DRY" || msg === "WET") {
-                    aiDashboard.innerText = msg === "DRY" ? "SORTING DRY 🧃" : "SORTING WET 🍎";
-                    aiDashboard.style.color = msg === "DRY" ? "yellow" : "cyan";
+                let umsg = msg.trim().toUpperCase();
+                if (umsg === "DRY" || umsg === "D") {
+                    aiDashboard.innerText = "SORTING DRY 🧃";
+                    aiDashboard.style.color = "yellow";
                     setTimeout(() => { aiDashboard.innerText = "SYSTEM ONLINE"; aiDashboard.style.color = "#0f0"; }, 4000);
+                } else if (umsg === "WET" || umsg === "W") {
+                    aiDashboard.innerText = "SORTING WET 🍎";
+                    aiDashboard.style.color = "#00ffcc";
+                    setTimeout(() => { aiDashboard.innerText = "SYSTEM ONLINE"; aiDashboard.style.color = "#0f0"; }, 4000);
+                } else if (umsg === "EWASTE" || umsg === "E") {
+                    aiDashboard.innerText = "E-WASTE DETECTED 📱";
+                    aiDashboard.style.color = "#ff00ff";
+                    setTimeout(() => { aiDashboard.innerText = "SYSTEM ONLINE"; aiDashboard.style.color = "#0f0"; }, 4000);
+                }
+            }
+
+            if (topic === 'dustu/telemetry') {
+                logTerminal(`[AI TELEMETRY]: ${msg}`);
+                let aiDashboard = document.getElementById("ai-status");
+                if (aiDashboard) {
+                    aiDashboard.innerText = msg;
+                    if (msg.includes("WET")) aiDashboard.style.color = "#00ffcc";
+                    else if (msg.includes("DRY")) aiDashboard.style.color = "yellow";
+                    else if (msg.includes("EWASTE") || msg.includes("E-WASTE")) aiDashboard.style.color = "#ff00ff";
+                    else if (msg.includes("HAZARD")) aiDashboard.style.color = "#ff3333";
+                    setTimeout(() => { aiDashboard.innerText = "SYSTEM ONLINE"; aiDashboard.style.color = "#0f0"; }, 4500);
                 }
             }
         });
@@ -697,6 +892,21 @@
             logTerminal("[SYS] Voice Control not supported on this browser.");
             window.directTalkCommand = function() { alert("Voice not supported on this browser/device."); }
         }
+
+        // Initialize Phone Cam Config on load
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedStreamId = localStorage.getItem('dustu_stream_id');
+            if (savedStreamId) {
+                const guestFrame = document.getElementById('guest-stream-frame');
+                const adminFrame = document.getElementById('admin-stream-frame');
+                const viewUrl = `https://vdo.ninja/?view=${encodeURIComponent(savedStreamId)}&cleanoutput=1&autoplay=1`;
+                if (guestFrame) guestFrame.src = viewUrl + '&quality=30&bitrate=500&buffer=0';
+                if (adminFrame) adminFrame.src = viewUrl;
+                const cfgInput = document.getElementById('cfg-stream-id');
+                if (cfgInput) cfgInput.value = savedStreamId;
+            }
+            updateGeneratedUrls();
+        });
     </script>
     <script>
         // Block Right Click
