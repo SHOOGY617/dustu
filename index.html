@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DUSTU.TECH | The Chaos Crew</title>
+    <title>DUSTU.TECH | Autonomous Smart Waste Rover</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
@@ -233,76 +233,47 @@
                 </div>
             </header>
 
-            <h2 style="text-align: center; color: var(--highlight); font-family: 'Press Start 2P'; margin-bottom: 30px; font-size: 1.2rem;">THE SQUAD</h2>
+            <h2 style="text-align: center; color: var(--highlight); font-family: 'Press Start 2P'; margin-bottom: 30px; font-size: 1.2rem;">SYSTEM CAPABILITIES</h2>
 
             <div class="grid">
-                <div class="card leader" onmouseover="dinoRoast('shlok')">
-                    <span class="role-tag">The Boss</span>
-                    <h3>Shlok Agrawal</h3>
-                    <p>Crashing, & Rebooting</p>
-                    <p style="font-size: 0.7rem; margin-top: 5px;">"It works on my machine (Arch btw)"</p>
-                    <button class="audio-btn" onclick="playNoise('shlok')">🔊 ERROR</button>
-                </div>
-                <div class="card" onmouseover="dinoRoast('arpit')">
-                    <span class="role-tag">Hardware</span>
-                    <h3>Arpit Kumar Dubey</h3>
-                    <p>Wiring & Sparks</p>
-                    <button class="audio-btn" onclick="playNoise('arpit')">🔊 ADMISSION REGRET</button>
-                </div>
-                <div class="card" onmouseover="dinoRoast('krishna')">
-                    <span class="role-tag">Integration</span>
-                    <h3>Krishna Singh</h3>
-                    <p>Making things fit</p>
-                    <button class="audio-btn" onclick="playNoise('krishna')">🔊 HEAR THIS</button>
-                </div>
-                <div class="card" onmouseover="dinoRoast('priyansh')">
-                    <span class="role-tag">Testing</span>
-                    <h3>Priyansh Sharma</h3>
-                    <p>Breaks things professionally</p>
-                    <button class="audio-btn" onclick="playNoise('priyansh')">🔊 SYSTEM CRASH</button>
-                </div>
-                <div class="card" onmouseover="dinoRoast('yash')">
-                    <span class="role-tag">Circuits</span>
-                    <h3>Yash Rana</h3>
-                    <p>Board Logic</p>
-                    <button class="audio-btn" onclick="playNoise('yash')">🔊 HEAR AUDIO</button>
-                </div>
-                <div class="card" onmouseover="dinoRoast('vansh')">
-                    <span class="role-tag">Research</span>
-                    <h3>Vansh Gupta</h3>
-                    <p>Googling stuff</p>
-                    <button class="audio-btn" onclick="playNoise('vansh')">🔊 Unfiltered</button>
+                <div class="card leader">
+                    <span class="role-tag">Core AI</span>
+                    <h3>YOLOv8 Vision Cortex</h3>
+                    <p>Real-Time Object & Person Tracking</p>
+                    <p style="font-size: 0.7rem; margin-top: 5px;">"High-speed 30 FPS spatial perception"</p>
                 </div>
                 <div class="card">
-                    <span class="role-tag">Power</span>
-                    <h3>Sani Jaiswal</h3>
-                    <p>Battery Manager</p>
-                    <button class="audio-btn" onclick="playNoise('sani')">🔊 LEAKED AUDIO</button>
+                    <span class="role-tag">Mechanics</span>
+                    <h3>Dual-Chamber Sorter</h3>
+                    <p>Electro-Mechanical Tilt Seesaw</p>
+                    <p style="font-size: 0.7rem; margin-top: 5px;">Automated Wet & Dry Waste Diverter</p>
                 </div>
                 <div class="card">
-                    <span class="role-tag">Docs</span>
-                    <h3>Poorvi Gupta</h3>
-                    <p>Writing the manual</p>
-                    <button class="audio-btn" onclick="playNoise('poorvi')">🔊 Classified</button>
+                    <span class="role-tag">IoT Cloud</span>
+                    <h3>MQTT Telemetry Link</h3>
+                    <p>broker.emqx.io Uplink</p>
+                    <p style="font-size: 0.7rem; margin-top: 5px;">Sub-50ms Cloud Command Bus</p>
                 </div>
                 <div class="card">
-                    <span class="role-tag">Design</span>
-                    <h3>Dweepraj Kaur</h3>
-                    <p>Makes it look cool</p>
-                    <button class="audio-btn" onclick="playNoise('dweepraj')">🔊 Missing File</button>
+                    <span class="role-tag">Audio</span>
+                    <h3>Neural Voice Engine</h3>
+                    <p>Speech Synthesis & Feedback</p>
+                    <p style="font-size: 0.7rem; margin-top: 5px;">Live Educational Voice Assistance</p>
+                </div>
+                <div class="card">
+                    <span class="role-tag">Safety</span>
+                    <h3>Proximity Radar</h3>
+                    <p>Hardware Obstacle Evasion</p>
+                    <p style="font-size: 0.7rem; margin-top: 5px;">Dead Man's Switch Auto-Brake</p>
+                </div>
+                <div class="card">
+                    <span class="role-tag">Impact</span>
+                    <h3>ESG Carbon Accounting</h3>
+                    <p>Life-Cycle CO2e Offset</p>
+                    <p style="font-size: 0.7rem; margin-top: 5px;">Real-Time Landfill Diversion Metrics</p>
                 </div>
             </div>
         </div>
-
-        <audio id="audio-arpit" src="arpit.mp3"></audio>
-        <audio id="audio-krishna" src="krishna.mp3"></audio>
-        <audio id="audio-priyansh" src="priyansh.mp3"></audio>
-        <audio id="audio-vansh" src="vansh.mp3"></audio>
-        <audio id="audio-yash" src="yash.mp3"></audio>
-        <audio id="audio-sani" src="sani.mp3"></audio>
-        <audio id="audio-poorvi" src="poorvi.mp3"></audio>
-        <audio id="audio-dweepraj" src="dweepraj.mp3"></audio>
-        <audio id="audio-shlok" src="shlok.mp3"></audio>
     </div>
 
     <div id="view-live" class="view">
@@ -312,7 +283,7 @@
         </div>
         
         <div class="vid-container">
-            <iframe src="https://vdo.ninja/?view=dustu_cam_01&cleanoutput=1&autoplay=1&quality=30&bitrate=500&buffer=0" allow="autoplay; camera;"></iframe>
+            <iframe src="https://vdo.ninja/?view=dustu_live_bot&cleanoutput=1&autoplay=1&quality=30&bitrate=500&buffer=0" allow="autoplay; camera;"></iframe>
             <div class="overlay-text">GUEST_CAM_FEED</div>
         </div>
 
@@ -339,7 +310,7 @@
 
         <div class="console-main">
             <div class="vid-container">
-                <iframe src="https://vdo.ninja/?view=dustu_cam_01&cleanoutput=1&autoplay=1" allow="autoplay; camera;"></iframe>
+                <iframe src="https://vdo.ninja/?view=dustu_live_bot&cleanoutput=1&autoplay=1" allow="autoplay; camera;"></iframe>
                 <div class="overlay-text">CAM_1: ONLINE</div>
             </div>
 
@@ -425,7 +396,7 @@
             if (document.getElementById('admin-password').value === "2026") {
                 closeAdminModal();
                 switchView('view-console');
-                logTerminal("SYS_ADMIN Shlok connected.");
+                logTerminal("SYS_ADMIN authenticated. Control link online.");
             } else triggerErrorShake('#admin-modal-box', 'admin-error');
         }
 
@@ -437,7 +408,7 @@
         document.getElementById('site-password').addEventListener('keypress', e => { if (e.key === 'Enter') checkSitePassword(); });
         document.getElementById('admin-password').addEventListener('keypress', e => { if (e.key === 'Enter') checkAdminPassword(); });
 
-        // --- 3. ANIMATIONS & DINO ROASTS ---
+        // --- 3. ANIMATIONS & DINO STATUS ---
         function startSiteAnimations() {
             anime.timeline({loop: false})
             .add({ targets: '.ml15 .word', scale: [14,1], opacity: [0,1], easing: "easeOutCirc", duration: 800, delay: (el, i) => 800 * i })
@@ -445,37 +416,28 @@
             .add({ targets: '.card', translateY: [50, 0], opacity: [0, 1], delay: anime.stagger(100), easing: 'spring(1, 80, 10, 0)' });
         }
 
-        const teamRoasts = {
-            'shlok': "Shlok is the kind of guy who’d sell his soul for 75% attendance and still fail.",
-            'arpit': "Arpit's future is as stable as the hostel Wi-Fi.",
-            'priyansh': "Priyansh is the reason the group project has a 'Part 2' next year.",
-            'krishna': "Krishna's code is 90% Stack Overflow, 10% prayers.",
-            'vansh': "Vansh is a specialist in doing nothing and still feeling tired.",
-            'yash': "Yash spent 4 hours picking a color. It's still gray."
-        };
+        const botQuotes = [
+            "Sorting Waste... Beep Boop.",
+            "Plastic bottle detected. Diverting to dry recycling!",
+            "Banana peel spotted. Composting saves methane emissions.",
+            "Contamination ruins batch recycling. Always segregate!",
+            "Zero-waste campus mode engaged.",
+            "Feed me recyclables, not excuses!"
+        ];
 
         const dino = document.getElementById('dino-container');
         const bubble = document.getElementById('dino-text');
 
         function popUpDino(textOverride) {
             if(currentActiveView !== 'view-home') return; 
-            bubble.innerText = textOverride || "Sorting Waste... Beep Boop.";
+            const randomQuote = botQuotes[Math.floor(Math.random() * botQuotes.length)];
+            bubble.innerText = textOverride || randomQuote;
             dino.style.bottom = "0px";
             setTimeout(() => { bubble.style.display = "block"; }, 300);
             setTimeout(() => { bubble.style.display = "none"; dino.style.bottom = "-300px"; }, 3500);
         }
 
-        function dinoRoast(name) { popUpDino(teamRoasts[name] || "Who is this human?"); }
         setInterval(() => popUpDino(), 10000);
-
-        function playNoise(name) {
-            document.querySelectorAll('audio').forEach(a => { a.pause(); a.currentTime = 0; });
-            const sound = document.getElementById('audio-' + name);
-            if (sound) {
-                sound.play().catch(e => console.log("Missing Audio:", name));
-                anime({ targets: event.target, scale: [1, 0.9, 1], duration: 200 });
-            }
-        }
 
         // --- 4. GLOBAL MQTT ROBOT CONTROL ---
         const mqtt_broker = 'wss://broker.emqx.io:8084/mqtt'; 
